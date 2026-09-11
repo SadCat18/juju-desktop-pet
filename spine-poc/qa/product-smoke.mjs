@@ -13,6 +13,7 @@ const actionMesh = JSON.parse(fs.readFileSync(path.join(root, "spine", "action-m
 const hostSource = fs.readFileSync(path.join(root, "desktop-host", "Main.cs"), "utf8");
 const hostLauncher = fs.readFileSync(path.join(root, "desktop-host", "启动啾啾桌宠.cmd"), "utf8");
 const packageLauncher = fs.readFileSync(path.join(root, "..", "outputs", "xiaobai-desktop-pet", "启动啾啾桌宠.cmd"), "utf8");
+const androidAssets = path.join(root, "..", "android-pet", "app", "src", "main", "assets");
 
 const requiredAnimations = ["idle", "waiting", "petting", "handshake", "feeding", "drinking", "playing", "sleeping", "cleaning"];
 const requiredBones = ["root"];
@@ -20,7 +21,7 @@ const requiredSlots = ["pet", "real-action", "real-action-next"];
 for (const name of requiredAnimations) assert.ok(rig.animations[name], `缺少 Spine 动画: ${name}`);
 for (const name of requiredBones) assert.ok(rig.bones.some((bone) => bone.name === name), `缺少整帧骨骼: ${name}`);
 for (const name of requiredSlots) assert.ok(rig.slots.some((slot) => slot.name === name), `缺少整帧槽位: ${name}`);
-for (const id of ["stage", "panel-toggle", "panel-close", "pet-bubble", "rig-status", "hunger-bar", "thirst-bar", "happiness-bar", "energy-bar", "cleanliness-bar", "auto-toggle", "quality-select", "scale-range", "scale-value"]) {
+for (const id of ["stage", "panel-toggle", "panel-close", "pet-bubble", "context-menu", "play-ball", "rig-status", "hunger-bar", "thirst-bar", "happiness-bar", "energy-bar", "cleanliness-bar", "food-count", "water-count", "inventory-feedback", "growth-status", "achievement-list", "auto-toggle", "quality-select", "scale-range", "scale-value", "equipment-toggle", "mute-toggle", "volume-range", "volume-value", "export-state", "import-state", "import-file"]) {
   assert.ok(html.includes(`id="${id}"`), `页面缺少产品控件: #${id}`);
 }
 assert.ok(rig.skins?.[0]?.attachments?.["real-action-next"], "缺少照片动作补帧附件");
@@ -29,8 +30,16 @@ for (const name of ["feeding", "drinking"]) {
   assert.equal(actionMesh.actions[name]?.samples?.length, 30, `动作网格姿态缺失: ${name}`);
 }
 assert.equal(actionMesh.frameRateTarget, 60, "动作网格目标帧率错误");
-for (const token of ["localStorage", "drag-window", "close-window", "minimize-window", "SpineCanvas", "setAnimation", "motionAccumulator", "applyPhotoActionBlend", "applyActionMeshPose", "action-mesh-30.json", "normalizeScale", "updateScaleUI", "petScale", "__jujuDiagnostics"]) {
+for (const token of ["localStorage", "drag-window", "close-window", "minimize-window", "SpineCanvas", "setAnimation", "motionAccumulator", "applyPhotoActionBlend", "ensureDailySupply", "applyElapsedDecay", "statFloor", "currentDay", "postHostMessage", "state-save", "notify:", "reduceMotion", "session-lock", "session-unlock", "receiveHostMessage", "context-menu", "queuePetTap", "normalizeScale", "updateScaleUI", "petScale", "exportState", "applyImportedState", "playSound", "startWanderTimer", "__jujuDiagnostics"]) {
   assert.ok(app.includes(token), `运行时缺少能力: ${token}`);
+}
+assert.ok(app.includes("actionMeshActive: false"), "动作网格诊断必须如实标记为未激活");
+assert.ok(!app.includes("applyActionMeshPose"), "已移除不可达的动作网格应用死代码");
+assert.ok(!app.includes("fullPoseMode"), "已移除失真的整帧/网格分支开关");
+assert.ok(css.includes(".context-menu"), "缺少 HTML 右键菜单样式");
+assert.ok(fs.existsSync(path.join(root, "scripts", "sync-android-assets.mjs")), "缺少 Android Web 资产同步脚本");
+for (const file of ["app.js", "index.html", "app.css"]) {
+  assert.deepEqual(fs.readFileSync(path.join(root, file)), fs.readFileSync(path.join(androidAssets, file)), `Android Web 资产未同步: ${file}`);
 }
 assert.ok(app.includes("setPanelOpen"), "照顾面板缺少统一开关逻辑");
 assert.ok(app.includes('panelClose?.addEventListener("click"'), "照顾面板缺少返回桌宠事件");

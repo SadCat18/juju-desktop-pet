@@ -38,6 +38,9 @@
       <div class="stage-card">
         <div class="stage-wrap" id="stage-wrap">
           <canvas id="stage" width="512" height="512" aria-label="啾啾 Spine GPU 动画画布"></canvas>
+          <div id="dirt-overlay" class="care-overlay dirt-overlay" role="status" aria-label="啾啾身上有一点灰尘" hidden>·　✦　·</div>
+          <div id="equipment-overlay" class="care-overlay equipment-overlay" role="status" aria-label="已装备小花领巾" hidden>🎀</div>
+          <button id="play-ball" class="play-ball" type="button" aria-label="拖住小球和啾啾玩">⚽</button>
           <div id="pet-bubble" class="pet-bubble" aria-live="polite"></div>
           <div class="quick-actions" aria-label="快捷照顾">
             <button class="quick-action" data-action="petting" title="摸摸头"><span>♡</span><b>摸摸头</b></button>
@@ -63,7 +66,10 @@
             <p class="eyebrow">CARE PANEL</p>
             <h2>照顾啾啾</h2>
           </div>
-          <span class="live-dot">LIVE</span>
+          <div class="control-head-actions">
+            <button class="panel-close" id="panel-close" type="button" title="返回桌宠" aria-label="返回桌宠"><span aria-hidden="true">←</span> 返回桌宠</button>
+            <span class="live-dot">LIVE</span>
+          </div>
         </div>
 
         <section class="status-panel" aria-label="啾啾状态">
@@ -113,6 +119,12 @@
             <button class="care-item" data-action="cleaning"><span class="care-item-icon">🫧</span><div><strong>梳毛毛</strong><small>恢复干净和心情</small></div><span class="care-item-arrow">›</span></button>
             <button class="care-item" data-action="rest"><span class="care-item-icon">☁</span><div><strong>小窝休息</strong><small>慢慢恢复活力</small></div><span class="care-item-arrow">›</span></button>
           </div>
+          <p id="inventory-feedback" class="inventory-feedback">每日补给 +5 食物 / +5 饮水 · 上限各 10</p>
+        </div>
+
+        <div class="section growth-section">
+          <div class="section-title-row"><p class="section-label">成长与成就</p><strong id="growth-status">Lv.1 · 0 XP</strong></div>
+          <ul id="achievement-list" class="achievement-list" aria-label="成就列表"></ul>
         </div>
 
         <div class="record-row">
@@ -127,23 +139,46 @@
           <div class="section-title-row"><p class="section-label">偏好设置</p><span class="section-help">自动保存</span></div>
           <label class="switch-row"><span>自动行为</span><input id="auto-toggle" type="checkbox" checked></label>
           <label class="switch-row"><span>自动行为间隔</span><select id="auto-interval"><option value="15">15 分钟</option><option value="30" selected>30 分钟</option><option value="60">60 分钟</option></select></label>
-          <label class="switch-row"><span>渲染档位</span><select id="quality-select"><option value="60">节能 · 60Hz</option><option value="180" selected>中等 · 180Hz</option><option value="300">流畅 · 300Hz</option></select></label>
+          <label class="switch-row"><span>动画更新</span><select id="quality-select"><option value="30">节能 · 30 FPS</option><option value="60" selected>标准 · 60 FPS</option><option value="90">流畅 · 90 FPS</option></select></label>
           <label class="scale-row" for="scale-range"><span>桌宠大小 <output id="scale-value" for="scale-range">100%</output></span><input id="scale-range" type="range" min="70" max="130" step="5" value="100"></label>
+          <label class="switch-row"><span>小花领巾（装饰）</span><input id="equipment-toggle" type="checkbox"></label>
+          <label class="switch-row"><span>静音</span><input id="mute-toggle" type="checkbox"></label>
+          <label class="scale-row" for="volume-range"><span>音量 <output id="volume-value" for="volume-range">55%</output></span><input id="volume-range" type="range" min="0" max="100" step="5" value="55"></label>
           <label class="switch-row"><span>显示骨架</span><input id="debug-toggle" type="checkbox"></label>
         </div>
 
-        <div class="tech-note">
-          <div class="note-icon">✦</div>
-          <div><strong>Spine 2D + GPU · 60 FPS 补帧已启用</strong><p>骨骼动作按真实时间步进并在关键姿势之间连续插值；喂食/喝水的照片帧使用短时双槽过渡，减少跳帧感。拖动时直接跟手，松开后再交给惯性。</p></div>
+        <div class="section archive-section">
+          <div class="section-title-row"><p class="section-label">存档</p><span class="section-help">只保存在本机</span></div>
+          <div class="archive-actions"><button class="text-button archive-button" id="export-state" type="button">导出 JSON</button><button class="text-button archive-button" id="import-state" type="button">导入 JSON</button></div>
+          <input id="import-file" type="file" accept="application/json,.json" hidden>
+        </div>
+
+        <div class="local-only-note">
+          <strong>本地实验能力</strong>
+          <p>对话模型与跨设备同步暂未接入；当前按钮只提供离线占位，不上传状态或调用网络服务。</p>
+          <button class="text-button" id="llm-placeholder" type="button">试试本地回应</button>
+        </div>
+
+          <div class="tech-note">
+           <div class="note-icon">✦</div>
+           <div><strong>Spine 2D + GPU · 照片动作平滑过渡</strong><p>当前资产是单 root 整帧 Spine，喂食/喝水使用现有照片帧的短时双槽过渡；分层 rig 与动作网格需后续真实骨骼资产，当前不会伪称已启用。</p></div>
         </div>
       </aside>
     </section>
 
     <footer>
       <span>Spine runtime 4.2.120 · WebGL GPU</span>
-      <span id="quality-note">目标 180Hz · Spine 连续补帧 · 实际刷新受显示器与系统合成器限制</span>
+      <span id="quality-note">动画更新上限 60 FPS · 标准</span>
     </footer>
   </main>
+
+  <div id="context-menu" class="context-menu" role="menu" aria-label="啾啾快捷菜单" hidden>
+    <button type="button" role="menuitem" data-context-action="feeding">🥣 喂食</button>
+    <button type="button" role="menuitem" data-context-action="drinking">💧 喝水</button>
+    <button type="button" role="menuitem" data-context-action="cleaning">🫧 梳毛</button>
+    <button type="button" role="menuitem" data-context-action="sleeping">☾ 睡觉</button>
+    <button type="button" role="menuitem" data-context-action="close">× 退出</button>
+  </div>
 
   <script src="vendor/spine-webgl-4.2.120.js"></script>
   <script src="app.js"></script>

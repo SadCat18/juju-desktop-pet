@@ -19,14 +19,26 @@ const scaleValue = document.querySelector("#scale-value");
 const autoToggle = document.querySelector("#auto-toggle");
 const autoInterval = document.querySelector("#auto-interval");
 const panelToggle = document.querySelector("#panel-toggle");
+const panelClose = document.querySelector("#panel-close");
 const windowActions = document.querySelector(".window-actions");
+const contextMenu = document.querySelector("#context-menu");
+const importFile = document.querySelector("#import-file");
+const playBall = document.querySelector("#play-ball");
+const dirtOverlay = document.querySelector("#dirt-overlay");
+const equipmentOverlay = document.querySelector("#equipment-overlay");
+const equipmentToggle = document.querySelector("#equipment-toggle");
+const muteToggle = document.querySelector("#mute-toggle");
+const volumeRange = document.querySelector("#volume-range");
+const volumeValue = document.querySelector("#volume-value");
+const growthStatus = document.querySelector("#growth-status");
+const achievementList = document.querySelector("#achievement-list");
 const desktopMode = new URLSearchParams(window.location.search).get("host") === "desktop";
 const mobileMode = new URLSearchParams(window.location.search).get("mobile") === "1";
-const actionRenderer = new URLSearchParams(window.location.search).get("action-renderer") || "spine-30";
-// Keep the whole registered cell intact. Independently rotating cropped
-// regions was the source of detached paws, ears, and facial features.
-const fullPoseMode = true;
 const storageKey = "juju-pet-state-v2";
+const statFloor = 15;
+const inventoryCaps = { food: 10, water: 10 };
+const dailySupply = { food: 5, water: 5 };
+const decayRates = { hunger: 0.75, thirst: 1.05, energy: 0.25, cleanliness: 0.35, happiness: 0.2 };
 
 if (desktopMode) document.body.classList.add("desktop-mode");
 if (mobileMode) document.body.classList.add("mobile-mode");
@@ -47,8 +59,10 @@ const animationLabels = {
 const defaultState = {
   stats: { hunger: 82, thirst: 76, energy: 68, cleanliness: 88, happiness: 74 },
   inventory: { food: 6, water: 8 },
-  settings: { autoBehavior: true, autoInterval: 30, quality: 180, scale: 100 },
-  record: { date: "", count: 0, lastAction: "" },
+  settings: { autoBehavior: true, autoInterval: 30, quality: 60, scale: 100, muted: false, volume: 55, accessory: false },
+  record: { date: "", count: 0, totalCount: 0, lastAction: "" },
+  dailySupplyDate: "",
+  growth: { xp: 0, level: 1, achievements: [] },
   lastUpdated: Date.now(),
 };
 
@@ -67,13 +81,19 @@ let toastTimer = null;
 let petBubbleTimer = null;
 let actionRun = null;
 let actionCommitTimer = null;
-let actionMesh = null;
 let motionAccumulator = 0;
 let measuredFrames = 0;
 let measuredElapsed = 0;
 let actualFps = 0;
 let simulationFrames = 0;
 let windowActionsHideTimer = null;
+let decayTimer = null;
+let wanderTimer = null;
+let pendingTapTimer = null;
+let lastNeedAlert = "";
+let audioContext = null;
+let hostState = { paused: false, reducedMotion: false, locked: false, timeOfDay: "day" };
+let ballDrag = null;
 
 const photoActionTimelines = {
   feeding: { prefix: "feeding-real", times: [0.12, 0.85, 1.58, 2.31, 3.04, 3.77], end: 4.85 },
@@ -86,12 +106,13 @@ window.__jujuDiagnostics = {
   simulationFrames: 0,
   spineInterpolation: true,
   photoFrameBlend: true,
-  photoActionRenderer: actionRenderer,
-  actionMeshInterpolation: true,
+  photoActionRenderer: "photo-flow",
+  actionMeshInterpolation: false,
   actionMeshLoaded: false,
-  actionMeshActive: actionRenderer !== "photo-flow",
+  actionMeshActive: false,
   actionMeshSampleCount: 0,
-  fullPoseRendering: fullPoseMode,
+  layeredRigActive: false,
+  layeredRigAvailable: false,
   lastDelta: 0,
 };
 
@@ -101,7 +122,7 @@ function clamp(value, min = 0, max = 100) {
 
 function normalizeQuality(value) {
   const candidate = Number(value);
-  return [60, 180, 300].includes(candidate) ? candidate : 180;
+  return [30, 60, 90].includes(candidate) ? candidate : 60;
 }
 
 function normalizeScale(value) {
@@ -114,9 +135,10 @@ function updateQualityUI() {
   quality = normalizeQuality(quality);
   qualitySelect.value = String(quality);
   const note = document.querySelector("#quality-note");
-  if (note) note.textContent = `目标 ${quality}Hz · Spine 连续补帧 · 实际刷新受显示器与系统合成器限制`;
-  if (interpolationStatus) interpolationStatus.textContent = "Spine 补帧开启";
-  window.__jujuDiagnostics.targetMotionHz = quality;
+  const effectiveQuality = hostState.reducedMotion ? Math.min(quality, 30) : quality;
+  if (note) note.textContent = `动画更新上限 ${effectiveQuality} FPS · ${hostState.reducedMotion ? "宿主节能" : quality === 30 ? "节能" : quality === 90 ? "流畅" : "标准"}`;
+  if (interpolationStatus) interpolationStatus.textContent = hostState.reducedMotion ? "宿主降帧" : "Spine 补帧开启";
+  window.__jujuDiagnostics.targetMotionHz = effectiveQuality;
 }
 
 function updateScaleUI() {
@@ -133,35 +155,58 @@ function updateScaleUI() {
 
 function readState() {
   try {
-    const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
-    return {
+    const saved = JSON.parse(localStorage.getItem(storageKey) || "null") || {};
+    const merged = {
       ...defaultState,
       ...saved,
       stats: { ...defaultState.stats, ...(saved?.stats || {}) },
       inventory: { ...defaultState.inventory, ...(saved?.inventory || {}) },
       settings: { ...defaultState.settings, ...(saved?.settings || {}) },
       record: { ...defaultState.record, ...(saved?.record || {}) },
+      growth: { ...defaultState.growth, ...(saved?.growth || {}) },
     };
+    Object.keys(merged.stats).forEach((name) => { merged.stats[name] = clamp(merged.stats[name]); });
+    Object.keys(inventoryCaps).forEach((name) => {
+      merged.inventory[name] = Math.max(0, Math.min(inventoryCaps[name], Math.floor(Number(merged.inventory[name]) || 0)));
+    });
+    merged.settings.autoBehavior = Boolean(merged.settings.autoBehavior);
+    merged.settings.autoInterval = [15, 30, 60].includes(Number(merged.settings.autoInterval)) ? Number(merged.settings.autoInterval) : 30;
+    merged.settings.quality = normalizeQuality(merged.settings.quality);
+    merged.settings.scale = normalizeScale(merged.settings.scale);
+    merged.settings.muted = Boolean(merged.settings.muted);
+    merged.settings.volume = clamp(merged.settings.volume, 0, 100);
+    merged.settings.accessory = Boolean(merged.settings.accessory);
+    merged.record.count = Math.max(0, Math.floor(Number(merged.record.count) || 0));
+    merged.record.totalCount = Math.max(merged.record.count, Math.floor(Number(merged.record.totalCount) || 0));
+    merged.growth.xp = Math.max(0, Math.floor(Number(merged.growth.xp) || 0));
+    merged.growth.level = Math.max(1, Math.floor(Number(merged.growth.level) || 1));
+    merged.growth.achievements = Array.isArray(merged.growth.achievements) ? merged.growth.achievements.filter((item) => typeof item === "string") : [];
+    return merged;
   } catch (_error) {
-    return { ...defaultState, stats: { ...defaultState.stats }, inventory: { ...defaultState.inventory }, settings: { ...defaultState.settings }, record: { ...defaultState.record } };
+    return JSON.parse(JSON.stringify(defaultState));
   }
 }
 
-function saveState() {
-  state.lastUpdated = Date.now();
+function saveState(updateTimestamp = true) {
+  if (updateTimestamp) state.lastUpdated = Date.now();
   try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (_error) { /* localStorage can be disabled in private contexts */ }
+  if (desktopMode || mobileMode) postHostMessage(JSON.stringify({ type: "state-save", state }));
 }
 
-function applyElapsedDecay() {
-  const elapsedMinutes = Math.max(0, (Date.now() - Number(state.lastUpdated || Date.now())) / 60000);
-  if (elapsedMinutes < 1) return;
-  state.stats.hunger = clamp(state.stats.hunger - elapsedMinutes * 0.75);
-  state.stats.thirst = clamp(state.stats.thirst - elapsedMinutes * 1.05);
-  state.stats.energy = clamp(state.stats.energy - elapsedMinutes * 0.25);
-  state.stats.cleanliness = clamp(state.stats.cleanliness - elapsedMinutes * 0.35);
-  state.stats.happiness = clamp(state.stats.happiness - elapsedMinutes * 0.2);
-  state.lastUpdated = Date.now();
-  saveState();
+function applyElapsedDecay(now = Date.now()) {
+  const lastUpdated = Number(state.lastUpdated);
+  const elapsedMinutes = Number.isFinite(lastUpdated) ? Math.max(0, (now - lastUpdated) / 60000) : 0;
+  let changed = false;
+  Object.entries(decayRates).forEach(([name, rate]) => {
+    const next = Math.max(statFloor, clamp(Number(state.stats[name]) - elapsedMinutes * rate));
+    if (next !== state.stats[name]) changed = true;
+    state.stats[name] = next;
+  });
+  if (elapsedMinutes > 0 || changed) {
+    state.lastUpdated = now;
+    saveState();
+  }
+  return changed;
 }
 
 function setPill(element, text, status) {
@@ -199,19 +244,260 @@ function postHostMessage(message) {
   if (window.chrome?.webview) window.chrome.webview.postMessage(message);
 }
 
+function updateCareVisuals() {
+  const dirty = Number(state.stats.cleanliness) < 40;
+  if (dirtOverlay) dirtOverlay.hidden = !dirty;
+  if (equipmentOverlay) equipmentOverlay.hidden = !state.settings.accessory;
+  document.body.classList.toggle("pet-dirty", dirty);
+  document.body.classList.toggle("pet-equipped", Boolean(state.settings.accessory));
+}
+
+const achievementLabels = {
+  first: "第一次照顾",
+  three: "连续陪伴 3 次",
+  clean: "毛毛香喷喷",
+  daily: "今日陪伴 5 次",
+};
+
+function updateGrowthUI() {
+  if (growthStatus) growthStatus.textContent = `Lv.${state.growth.level} · ${state.growth.xp} XP`;
+  if (!achievementList) return;
+  achievementList.replaceChildren();
+  const earned = state.growth.achievements;
+  Object.entries(achievementLabels).forEach(([key, label]) => {
+    const item = document.createElement("li");
+    item.textContent = `${earned.includes(key) ? "✓" : "○"} ${label}`;
+    item.className = earned.includes(key) ? "earned" : "locked";
+    achievementList.append(item);
+  });
+}
+
+function awardGrowth(actionLabel) {
+  state.growth.xp += 2;
+  state.growth.level = 1 + Math.floor(state.growth.xp / 10);
+  const total = state.record.totalCount;
+  const candidates = [
+    ["first", total >= 1],
+    ["three", total >= 3],
+    ["clean", actionLabel === "清洁" && state.stats.cleanliness >= 70],
+    ["daily", state.record.count >= 5],
+  ];
+  candidates.forEach(([key, condition]) => {
+    if (!condition || state.growth.achievements.includes(key)) return;
+    state.growth.achievements.push(key);
+    showToast(`成就解锁 · ${achievementLabels[key]}`);
+  });
+}
+
+function checkLowNeeds() {
+  const low = [];
+  if (state.stats.hunger < 25) low.push("hunger");
+  if (state.stats.thirst < 25) low.push("thirst");
+  if (low.length === 0) {
+    lastNeedAlert = "";
+    return;
+  }
+  const key = low.join(",");
+  if (key === lastNeedAlert) return;
+  lastNeedAlert = key;
+  const message = low.includes("hunger") && low.includes("thirst") ? "啾啾又饿又渴，想要一点照顾" : low[0] === "hunger" ? "啾啾肚子饿啦，想吃饭饭" : "啾啾有点口渴，想喝水水";
+  showPetBubble(message, 5000);
+  if (!hostState.paused && !hostState.locked && !actionRun && animationState) setAnimation("waiting", true);
+  postHostMessage(`notify:${message}`);
+  postHostMessage(JSON.stringify({ type: "notify", message }));
+}
+
+function playSound(actionName) {
+  if (state.settings.muted) return;
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return;
+  try {
+    audioContext ||= new AudioContextClass();
+    if (audioContext.state === "suspended") audioContext.resume().catch(() => {});
+    const now = audioContext.currentTime;
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    const frequency = actionName === "drinking" ? 520 : actionName === "feeding" ? 260 : actionName === "sleeping" || actionName === "rest" ? 110 : actionName === "running" ? 420 : 330;
+    oscillator.type = actionName === "sleeping" || actionName === "rest" ? "sine" : "triangle";
+    oscillator.frequency.setValueAtTime(frequency, now);
+    oscillator.frequency.exponentialRampToValueAtTime(Math.max(80, frequency * 0.72), now + 0.16);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.005, state.settings.volume / 1000), now + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+    oscillator.connect(gain).connect(audioContext.destination);
+    oscillator.start(now);
+    oscillator.stop(now + 0.2);
+  } catch (_error) { /* sound is an enhancement; a blocked audio context must not break care actions */ }
+}
+
+function setHostState(nextState = {}) {
+  const previous = hostState;
+  hostState = {
+    ...hostState,
+    paused: Boolean(nextState.paused ?? hostState.paused),
+    reducedMotion: Boolean(nextState.reducedMotion ?? nextState.reduceMotion ?? hostState.reducedMotion),
+    locked: Boolean(nextState.locked ?? hostState.locked),
+    timeOfDay: ["morning", "day", "evening", "night"].includes(nextState.timeOfDay) ? nextState.timeOfDay : hostState.timeOfDay,
+  };
+  document.body.classList.toggle("host-paused", hostState.paused);
+  document.body.classList.toggle("host-locked", hostState.locked);
+  updateQualityUI();
+  if (hostState.locked) {
+    clearActionRun();
+    setAnimation("sleeping", true);
+    showPetBubble("屏幕锁定啦，啾啾先安静睡觉", 3600);
+  } else if (hostState.timeOfDay === "night") {
+    clearActionRun();
+    setAnimation("sleeping", true);
+    showPetBubble("夜深啦，啾啾陪你一起休息", 3600);
+  } else if (previous.locked || previous.timeOfDay === "night") {
+    setAnimation("idle", true);
+    showPetBubble(hostState.timeOfDay === "morning" ? "早安！啾啾醒来啦" : "啾啾回来陪你啦", 3600);
+  } else if (hostState.paused) {
+    showPetBubble("啾啾先暂停一下，等你回来", 3600);
+  } else if (hostState.timeOfDay === "morning") {
+    showPetBubble("早安！今天也要一起玩", 3600);
+  }
+  scheduleAutoBehavior();
+}
+
+function receiveHostMessage(rawMessage) {
+  let message = rawMessage;
+  if (typeof message === "string") {
+    if (message.startsWith("host-state:")) {
+      try { message = JSON.parse(message.slice("host-state:".length)); } catch (_error) { return; }
+    } else if (message === "host-paused") message = { type: "host-state", paused: true };
+    else if (message === "host-resumed") message = { type: "host-state", paused: false };
+    else if (message === "host-locked") message = { type: "host-state", locked: true };
+    else if (message === "host-unlocked") message = { type: "host-state", locked: false, timeOfDay: "morning" };
+    else return;
+  }
+  if (!message || typeof message !== "object") return;
+  if (message.type === "host-state") {
+    if (message.event === "restore-state" && message.state) applyImportedState(message.state, true);
+    else if (message.event === "session-lock") setHostState({ ...message, locked: true, paused: true });
+    else if (message.event === "session-unlock") {
+      setHostState({ ...message, locked: false, paused: false, timeOfDay: "morning" });
+      if (message.greeting) showPetBubble(message.greeting, 3600);
+    } else setHostState(message);
+    if (message.event === "battery" && message.greeting) showPetBubble(message.greeting, 3600);
+  }
+  if (message.type === "state-restore" && message.state) applyImportedState(message.state, true);
+}
+
+window.addEventListener("message", (event) => receiveHostMessage(event.data));
+window.chrome?.webview?.addEventListener("message", (event) => receiveHostMessage(event.data));
+
+function normalizeSnapshot(snapshot) {
+  const candidate = snapshot?.state && typeof snapshot.state === "object" ? snapshot.state : snapshot;
+  if (!candidate || typeof candidate !== "object" || !candidate.stats || !candidate.inventory) throw new Error("存档缺少状态或库存");
+  const next = {
+    ...defaultState,
+    ...candidate,
+    stats: { ...defaultState.stats, ...(candidate.stats || {}) },
+    inventory: { ...defaultState.inventory, ...(candidate.inventory || {}) },
+    settings: { ...defaultState.settings, ...(candidate.settings || {}) },
+    record: { ...defaultState.record, ...(candidate.record || {}) },
+    growth: { ...defaultState.growth, ...(candidate.growth || {}) },
+  };
+  Object.keys(decayRates).forEach((name) => { next.stats[name] = clamp(next.stats[name]); });
+  Object.keys(inventoryCaps).forEach((name) => { next.inventory[name] = Math.max(0, Math.min(inventoryCaps[name], Math.floor(Number(next.inventory[name]) || 0))); });
+  next.settings.autoBehavior = Boolean(next.settings.autoBehavior);
+  next.settings.autoInterval = [15, 30, 60].includes(Number(next.settings.autoInterval)) ? Number(next.settings.autoInterval) : 30;
+  next.settings.quality = normalizeQuality(next.settings.quality);
+  next.settings.scale = normalizeScale(next.settings.scale);
+  next.settings.muted = Boolean(next.settings.muted);
+  next.settings.volume = clamp(next.settings.volume, 0, 100);
+  next.settings.accessory = Boolean(next.settings.accessory);
+  next.record.count = Math.max(0, Math.floor(Number(next.record.count) || 0));
+  next.record.totalCount = Math.max(next.record.count, Math.floor(Number(next.record.totalCount) || 0));
+  next.growth.xp = Math.max(0, Math.floor(Number(next.growth.xp) || 0));
+  next.growth.level = Math.max(1, Math.floor(Number(next.growth.level) || 1));
+  next.growth.achievements = Array.isArray(next.growth.achievements) ? next.growth.achievements.filter((item) => typeof item === "string" && Object.hasOwn(achievementLabels, item)) : [];
+  return next;
+}
+
+function applyImportedState(snapshot, fromHost = false) {
+  try {
+    state = normalizeSnapshot(snapshot);
+    ensureDailySupply();
+    applyElapsedDecay();
+    saveState();
+    quality = state.settings.quality;
+    petScale = state.settings.scale;
+    updateStatusUI();
+    updateQualityUI();
+    updateScaleUI();
+    setAnimation("idle", true);
+    showToast(fromHost ? "已从宿主恢复啾啾存档" : "存档导入成功");
+  } catch (error) {
+    showToast(`存档导入失败 · ${error.message}`);
+  }
+}
+
+function exportState() {
+  try {
+    ensureDailySupply();
+    applyElapsedDecay();
+    saveState();
+    const payload = JSON.stringify({ schema: "juju-pet-state-v3", exportedAt: new Date().toISOString(), state });
+    const url = URL.createObjectURL(new Blob([payload], { type: "application/json" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `juju-pet-${currentDay()}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    postHostMessage(JSON.stringify({ type: "state-save", state }));
+    showToast("存档已导出");
+  } catch (_error) {
+    showToast("存档导出失败，请稍后再试");
+  }
+}
+
+async function importStateFile(file) {
+  if (!file) return;
+  if (file.size > 512 * 1024) {
+    showToast("存档文件过大，未导入");
+    return;
+  }
+  try {
+    applyImportedState(JSON.parse(await file.text()));
+  } catch (_error) {
+    showToast("存档不是有效的 JSON");
+  } finally {
+    if (importFile) importFile.value = "";
+  }
+}
+
 function rendererName(gl) {
   const info = gl.getExtension("WEBGL_debug_renderer_info");
   return info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
 }
 
 function currentDay() {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const pad = (value) => String(value).padStart(2, "0");
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
+function ensureDailySupply() {
+  const date = currentDay();
+  if (state.dailySupplyDate === date) return false;
+  Object.entries(dailySupply).forEach(([name, amount]) => {
+    state.inventory[name] = Math.min(inventoryCaps[name], Math.max(0, Number(state.inventory[name]) || 0) + amount);
+  });
+  state.dailySupplyDate = date;
+  saveState(false);
+  showToast(`今日补给到账 · 食物 +${dailySupply.food} · 饮水 +${dailySupply.water}`);
+  return true;
 }
 
 function updateRecord(action) {
   const date = currentDay();
-  if (state.record.date !== date) state.record = { date, count: 0, lastAction: "" };
+  const previousTotal = Math.max(0, Number(state.record.totalCount) || 0);
+  if (state.record.date !== date) state.record = { ...state.record, date, count: 0, lastAction: "" };
   state.record.count += 1;
+  state.record.totalCount = previousTotal + 1;
   state.record.lastAction = action;
 }
 
@@ -239,6 +525,8 @@ function updateStatusUI() {
   document.querySelector("#status-summary").textContent = statusSummary();
   document.querySelector("#food-count").textContent = state.inventory.food;
   document.querySelector("#water-count").textContent = state.inventory.water;
+  const inventoryFeedback = document.querySelector("#inventory-feedback");
+  if (inventoryFeedback && !inventoryFeedback.textContent) inventoryFeedback.textContent = `每日补给 +${dailySupply.food} 食物 / +${dailySupply.water} 饮水 · 上限各 ${inventoryCaps.food}`;
   document.querySelector("#today-record").textContent = state.record.count ? `${state.record.count} 次互动 · 最近${state.record.lastAction}` : "还没有记录";
   document.querySelector("#mood-status").textContent = `${statusSummary()} · 今天也要和你一起玩`;
   autoToggle.checked = Boolean(state.settings.autoBehavior);
@@ -246,6 +534,13 @@ function updateStatusUI() {
   qualitySelect.value = String(quality);
   if (scaleRange) scaleRange.value = String(petScale);
   if (scaleValue) scaleValue.textContent = `${petScale}%`;
+  if (muteToggle) muteToggle.checked = Boolean(state.settings.muted);
+  if (volumeRange) volumeRange.value = String(state.settings.volume);
+  if (volumeValue) volumeValue.textContent = `${Math.round(state.settings.volume)}%`;
+  if (equipmentToggle) equipmentToggle.checked = Boolean(state.settings.accessory);
+  updateCareVisuals();
+  updateGrowthUI();
+  checkLowNeeds();
 }
 
 function adjustStats(delta = {}) {
@@ -297,96 +592,7 @@ function clearPhotoActionBlend() {
   }
 }
 
-function setLayeredActionPose(actionName) {
-  const layers = [
-    ["tail", "rig-tail"],
-    ["body", "rig-body"],
-    ["paw-left", "rig-paw-left"],
-    ["paw-right", "rig-paw-right"],
-    ["head", "rig-head"],
-    ["ear-left", "rig-ear-left"],
-    ["ear-right", "rig-ear-right"],
-  ];
-  layers.forEach(([slotName, attachmentName]) => {
-    const slot = skeleton.findSlot(slotName);
-    if (slot) slot.setAttachment(skeleton.getAttachment(slot.data.index, attachmentName));
-  });
-  ["prop-food", "prop-water", "prop-ball"].forEach((slotName) => {
-    const slot = skeleton.findSlot(slotName);
-    if (!slot) return;
-    const attachmentName = actionName === "feeding" && slotName === "prop-food"
-      ? "rig-food-bowl"
-      : actionName === "drinking" && slotName === "prop-water"
-        ? "rig-water-bowl"
-        : null;
-    slot.setAttachment(attachmentName ? skeleton.getAttachment(slot.data.index, attachmentName) : null);
-  });
-  clearPhotoActionBlend();
-}
-
-function sampleActionMeshPose(actionName, time) {
-  const definition = actionMesh?.actions?.[actionName];
-  const samples = definition?.samples;
-  if (!Array.isArray(samples) || samples.length === 0) return null;
-
-  const clampedTime = Math.max(0, Math.min(Number(definition.duration) || 0, Number(time) || 0));
-  if (clampedTime <= Number(samples[0].time) || samples.length === 1) return samples[0].bones || {};
-
-  let rightIndex = samples.length - 1;
-  for (let index = 1; index < samples.length; index += 1) {
-    if (clampedTime <= Number(samples[index].time)) {
-      rightIndex = index;
-      break;
-    }
-  }
-  const left = samples[rightIndex - 1];
-  const right = samples[rightIndex];
-  const span = Math.max(0.0001, Number(right.time) - Number(left.time));
-  const amount = smoothStep((clampedTime - Number(left.time)) / span);
-  const pose = {};
-  const boneNames = new Set([...Object.keys(left.bones || {}), ...Object.keys(right.bones || {})]);
-  const properties = ["rotate", "scaleX", "scaleY", "x", "y"];
-  boneNames.forEach((boneName) => {
-    const leftBone = left.bones?.[boneName] || {};
-    const rightBone = right.bones?.[boneName] || leftBone;
-    const values = {};
-    properties.forEach((property) => {
-      const leftValue = leftBone[property];
-      const rightValue = rightBone[property];
-      if (leftValue === undefined && rightValue === undefined) return;
-      const fallback = property === "scaleX" || property === "scaleY" ? 1 : 0;
-      const from = Number(leftValue ?? rightValue ?? fallback);
-      const to = Number(rightValue ?? leftValue ?? fallback);
-      values[property] = from + (to - from) * amount;
-    });
-    pose[boneName] = values;
-  });
-  return pose;
-}
-
-function applyActionMeshPose(actionName) {
-  const pose = sampleActionMeshPose(actionName, animationState.getCurrent(0)?.trackTime || 0);
-  if (!pose) return false;
-  setLayeredActionPose(actionName);
-  Object.entries(pose).forEach(([boneName, values]) => {
-    const bone = skeleton.findBone(boneName);
-    if (!bone) return;
-    if (Number.isFinite(values.rotate)) bone.rotation = Number(bone.data.rotation || 0) + values.rotate;
-    if (Number.isFinite(values.scaleX)) bone.scaleX = Number(bone.data.scaleX || 1) * values.scaleX;
-    if (Number.isFinite(values.scaleY)) bone.scaleY = Number(bone.data.scaleY || 1) * values.scaleY;
-    if (Number.isFinite(values.x)) bone.x = Number(bone.data.x || 0) + values.x;
-    if (Number.isFinite(values.y)) bone.y = Number(bone.data.y || 0) + values.y;
-  });
-  return true;
-}
-
 function applyPhotoActionBlend() {
-  if (!fullPoseMode && actionRenderer !== "photo-flow") {
-    if (currentAnimation === "feeding" || currentAnimation === "drinking") {
-      if (!applyActionMeshPose(currentAnimation)) setLayeredActionPose(currentAnimation);
-    }
-    return;
-  }
   const timeline = photoActionTimelines[currentAnimation];
   const currentSlot = skeleton?.findSlot("real-action");
   const nextSlot = skeleton?.findSlot("real-action-next");
@@ -430,6 +636,7 @@ function applyPhotoActionBlend() {
 
 const actionEffects = {
   petting: { label: "摸摸头", animation: "petting", stats: { happiness: 4 }, commitAfter: 700, startMessage: "啾啾把小脑袋凑过来了", message: "啾啾舒服地眯起眼睛" },
+  running: { label: "跳跳", animation: "running", stats: { energy: -2, happiness: 5 }, commitAfter: 900, startMessage: "啾啾开心地跳起来啦", message: "跳得好高，再来一圈" },
   handshake: { label: "握手", stats: { energy: -2, happiness: 2 }, commitAfter: 1050, startMessage: "啾啾伸出小爪爪", message: "啾啾和你握手啦" },
   waiting: { label: "等待", loop: true, commitAfter: 500, startMessage: "啾啾抬头等你回应", message: "啾啾还在期待你" },
   feeding: { label: "喂食", stats: { hunger: 24, energy: -1, happiness: 3 }, inventory: "food", commitAfter: 2350, startMessage: "饭碗出现啦，啾啾闻到香味了", message: "饭饭吃饱啦，啾啾舔舔嘴" },
@@ -451,22 +658,33 @@ function commitAction(run) {
   if (run.effect.inventory && state.inventory[run.effect.inventory] <= 0) {
     showToast(run.effect.inventory === "food" ? "饭碗空了，这次没有扣除库存" : "水碗空了，这次没有扣除库存");
     actionRun.committed = true;
+    updateStatusUI();
     return;
   }
-  if (run.effect.inventory) state.inventory[run.effect.inventory] -= 1;
+  let consumption = "";
+  if (run.effect.inventory) {
+    state.inventory[run.effect.inventory] -= 1;
+    const label = run.effect.inventory === "food" ? "食物" : "饮水";
+    consumption = `消耗 1 份${label} · 剩余 ${state.inventory[run.effect.inventory]}`;
+    const inventoryFeedback = document.querySelector("#inventory-feedback");
+    if (inventoryFeedback) inventoryFeedback.textContent = `刚刚${consumption}`;
+  }
   adjustStats(run.effect.stats);
   updateRecord(run.effect.label);
+  awardGrowth(run.effect.label);
   actionRun.committed = true;
   saveState();
   updateStatusUI();
   dragStatus.textContent = `刚刚完成 · ${run.effect.label}`;
   showPetBubble(run.effect.message);
-  showToast(run.effect.message);
+  playSound(run.name);
+  showToast(consumption ? `${run.effect.message} · ${consumption}` : run.effect.message);
 }
 
 function triggerAction(actionName, fromAuto = false) {
   const effect = actionEffects[actionName];
   if (!effect) return;
+  ensureDailySupply();
   const animation = effect.animation || actionName;
   if (actionRun && !actionRun.completed && actionRun.name === actionName) {
     showPetBubble("啾啾正在做这件事呢");
@@ -509,11 +727,8 @@ function worldPerCssPixel() {
 
 function beginDrag(event) {
   if (!skeleton) return;
-  if (desktopMode) {
-    event.preventDefault();
-    if (!mobileMode) postHostMessage("drag-window");
-    return;
-  }
+  if (event.button !== undefined && event.button !== 0) return;
+  if (desktopMode && mobileMode) return;
   canvasElement.setPointerCapture(event.pointerId);
   drag = {
     pointerId: event.pointerId,
@@ -524,13 +739,30 @@ function beginDrag(event) {
     lastX: targetPosition.x,
     lastY: targetPosition.y,
     lastTime: performance.now(),
+    startedAt: performance.now(),
+    moved: false,
+    nativeWindow: desktopMode,
   };
   velocity = { x: 0, y: 0 };
+  if (desktopMode) {
+    event.preventDefault();
+    return;
+  }
   dragStatus.textContent = "正在拖动 · 1:1 跟手中";
 }
 
 function moveDrag(event) {
   if (!drag || event.pointerId !== drag.pointerId) return;
+  const distance = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY);
+  if (drag.nativeWindow) {
+    if (!drag.moved && distance > 8) {
+      drag.moved = true;
+      postHostMessage("drag-window");
+      dragStatus.textContent = "正在拖动窗口";
+    }
+    return;
+  }
+  drag.moved = drag.moved || distance > 8;
   const scale = worldPerCssPixel();
   const nextX = drag.originX + (event.clientX - drag.startX) * scale;
   const nextY = drag.originY - (event.clientY - drag.startY) * scale;
@@ -545,13 +777,33 @@ function moveDrag(event) {
   targetPosition.y = nextY;
 }
 
+function queuePetTap() {
+  if (pendingTapTimer) {
+    clearTimeout(pendingTapTimer);
+    pendingTapTimer = null;
+    triggerAction("running");
+    return;
+  }
+  pendingTapTimer = setTimeout(() => {
+    pendingTapTimer = null;
+    triggerAction("petting");
+  }, 300);
+}
+
 function endDrag(event) {
   if (!drag || event.pointerId !== drag.pointerId) return;
+  const released = drag;
   drag = null;
-  dragStatus.textContent = "松开后会有轻微惯性";
+  if (released.nativeWindow) {
+    if (!released.moved) queuePetTap();
+    return;
+  }
+  if (!released.moved) queuePetTap();
+  else dragStatus.textContent = "松开后会有轻微惯性";
 }
 
 function advanceMotion(step) {
+  if (hostState.paused || hostState.locked) return;
   animationState.update(step);
   animationState.apply(skeleton);
   applyPhotoActionBlend();
@@ -600,15 +852,37 @@ function updateFrameTelemetry(delta) {
 
 function scheduleAutoBehavior() {
   clearTimeout(autoTimer);
-  if (!state.settings.autoBehavior) return;
+  if (!state.settings.autoBehavior || hostState.paused || hostState.locked || hostState.timeOfDay === "night") return;
   autoTimer = setTimeout(() => {
     applyElapsedDecay();
-    if (currentAnimation === "idle" && !drag) {
+    if (!hostState.paused && !hostState.locked && currentAnimation === "idle" && !drag) {
       const choice = state.stats.energy < 32 ? "rest" : state.stats.happiness < 45 ? "playing" : "waiting";
       triggerAction(choice, true);
     }
     scheduleAutoBehavior();
   }, Math.max(1, Number(state.settings.autoInterval) || 30) * 60000);
+}
+
+function startDecayTimer() {
+  clearInterval(decayTimer);
+  decayTimer = setInterval(() => {
+    ensureDailySupply();
+    applyElapsedDecay();
+    updateStatusUI();
+  }, 60000);
+}
+
+function startWanderTimer() {
+  clearInterval(wanderTimer);
+  if (!desktopMode) return;
+  wanderTimer = setInterval(() => {
+    if (hostState.paused || hostState.locked || document.body.classList.contains("panel-open") || drag || actionRun || currentAnimation !== "idle") return;
+    const direction = Math.random() > 0.5 ? 1 : -1;
+    targetPosition.x = Math.max(-110, Math.min(110, targetPosition.x + direction * 46));
+    velocity.x = direction * 18;
+    setAnimation("running", false);
+    showPetBubble("啾啾沿着桌面走走", 1800);
+  }, 12000);
 }
 
 function showWindowActions() {
@@ -627,14 +901,48 @@ function hideWindowActionsSoon() {
   }, 260);
 }
 
+function hideContextMenu() {
+  if (!contextMenu) return;
+  contextMenu.hidden = true;
+}
+
+function showContextMenu(event) {
+  if (!contextMenu) return;
+  event.preventDefault();
+  contextMenu.hidden = false;
+  const width = contextMenu.offsetWidth || 146;
+  const height = contextMenu.offsetHeight || 190;
+  contextMenu.style.left = `${Math.min(event.clientX, window.innerWidth - width - 8)}px`;
+  contextMenu.style.top = `${Math.min(event.clientY, window.innerHeight - height - 8)}px`;
+  contextMenu.querySelector("button")?.focus();
+}
+
+function handleContextAction(action) {
+  hideContextMenu();
+  if (action === "close") {
+    if (desktopMode || mobileMode) postHostMessage("close-window");
+    else showToast("浏览器体验版不会关闭窗口");
+    return;
+  }
+  triggerAction(action);
+}
+
 canvasElement.addEventListener("pointerdown", beginDrag);
 canvasElement.addEventListener("pointermove", moveDrag);
 canvasElement.addEventListener("pointerup", endDrag);
 canvasElement.addEventListener("pointercancel", endDrag);
+canvasElement.addEventListener("contextmenu", showContextMenu);
 canvasElement.addEventListener("pointerenter", showWindowActions);
 canvasElement.addEventListener("pointerleave", hideWindowActionsSoon);
 windowActions?.addEventListener("pointerenter", showWindowActions);
 windowActions?.addEventListener("pointerleave", hideWindowActionsSoon);
+contextMenu?.addEventListener("click", (event) => {
+  const action = event.target.closest("[data-context-action]")?.dataset.contextAction;
+  if (action) handleContextAction(action);
+});
+document.addEventListener("pointerdown", (event) => {
+  if (contextMenu && !contextMenu.hidden && !contextMenu.contains(event.target)) hideContextMenu();
+});
 window.addEventListener("resize", resizeRenderer);
 document.querySelectorAll("[data-host-action]").forEach((element) => {
   element.addEventListener("pointerdown", (event) => {
@@ -650,13 +958,35 @@ document.querySelectorAll("[data-host-action]").forEach((element) => {
   });
 });
 
-panelToggle.addEventListener("click", () => {
-  document.body.classList.toggle("panel-open");
-  const opened = document.body.classList.contains("panel-open");
+function setPanelOpen(opened) {
+  document.body.classList.toggle("panel-open", opened);
   panelToggle.setAttribute("aria-expanded", String(opened));
   panelToggle.title = opened ? "收起照顾面板" : "打开照顾面板";
   postHostMessage(opened ? "panel-open" : "panel-close");
-  panelToggle.blur();
+  if (!opened) {
+    panelClose?.blur();
+    panelToggle?.blur();
+  }
+}
+
+panelToggle?.addEventListener("click", () => {
+  setPanelOpen(!document.body.classList.contains("panel-open"));
+});
+
+panelClose?.addEventListener("click", () => {
+  setPanelOpen(false);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && contextMenu && !contextMenu.hidden) {
+    event.preventDefault();
+    hideContextMenu();
+    return;
+  }
+  if (event.key === "Escape" && document.body.classList.contains("panel-open")) {
+    event.preventDefault();
+    setPanelOpen(false);
+  }
 });
 
 document.querySelectorAll(".action").forEach((button) => {
@@ -706,10 +1036,68 @@ autoInterval.addEventListener("change", () => {
   scheduleAutoBehavior();
 });
 
+muteToggle?.addEventListener("change", () => {
+  state.settings.muted = muteToggle.checked;
+  saveState();
+  showToast(state.settings.muted ? "声音已静音" : "声音已开启");
+});
+
+volumeRange?.addEventListener("input", () => {
+  state.settings.volume = clamp(volumeRange.value, 0, 100);
+  if (volumeValue) volumeValue.textContent = `${Math.round(state.settings.volume)}%`;
+  saveState();
+});
+
+equipmentToggle?.addEventListener("change", () => {
+  state.settings.accessory = equipmentToggle.checked;
+  saveState();
+  updateCareVisuals();
+  showToast(equipmentToggle.checked ? "小花领巾已装备（本地装饰）" : "小花领巾已收起");
+});
+
+document.querySelector("#export-state")?.addEventListener("click", exportState);
+document.querySelector("#import-state")?.addEventListener("click", () => importFile?.click());
+importFile?.addEventListener("change", () => importStateFile(importFile.files?.[0]));
+document.querySelector("#llm-placeholder")?.addEventListener("click", () => showPetBubble(`${statusSummary()}。这里是离线本地回应，尚未连接对话模型。`, 3600));
+
+playBall?.addEventListener("pointerdown", (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  playBall.setPointerCapture(event.pointerId);
+  ballDrag = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY };
+});
+playBall?.addEventListener("pointermove", (event) => {
+  if (!ballDrag || ballDrag.pointerId !== event.pointerId) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const dx = event.clientX - ballDrag.startX;
+  const dy = event.clientY - ballDrag.startY;
+  playBall.style.transform = `translate(${dx}px, ${dy}px)`;
+});
+playBall?.addEventListener("pointerup", (event) => {
+  if (!ballDrag || ballDrag.pointerId !== event.pointerId) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const distance = Math.hypot(event.clientX - ballDrag.startX, event.clientY - ballDrag.startY);
+  ballDrag = null;
+  playBall.style.transform = "";
+  if (distance > 18) {
+    playBall.classList.add("thrown");
+    showPetBubble("小球飞出去啦，啾啾去追！");
+    triggerAction("running");
+    setTimeout(() => playBall.classList.remove("thrown"), 820);
+  } else triggerAction("playing");
+});
+playBall?.addEventListener("pointercancel", () => {
+  ballDrag = null;
+  playBall.style.transform = "";
+});
+document.addEventListener("pointerdown", () => audioContext?.resume().catch(() => {}), { passive: true });
+
 document.querySelector("#reset-state").addEventListener("click", () => {
   if (!window.confirm("要把啾啾的状态和库存恢复到初始值吗？")) return;
   clearActionRun();
-  state = { ...defaultState, stats: { ...defaultState.stats }, inventory: { ...defaultState.inventory }, settings: { ...defaultState.settings }, record: { ...defaultState.record }, lastUpdated: Date.now() };
+  state = JSON.parse(JSON.stringify({ ...defaultState, lastUpdated: Date.now() }));
   quality = normalizeQuality(state.settings.quality);
   saveState();
   updateStatusUI();
@@ -722,15 +1110,16 @@ document.querySelector("#reset-state").addEventListener("click", () => {
 
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) {
+    ensureDailySupply();
     applyElapsedDecay();
     updateStatusUI();
+    updateQualityUI();
   }
 });
 
 const app = {
   loadAssets: (host) => {
     host.assetManager.loadJson("full-pet.json");
-    host.assetManager.loadJson("action-mesh-30.json");
     host.assetManager.loadTextureAtlas("full-pet.atlas");
   },
 
@@ -738,7 +1127,6 @@ const app = {
     try {
       const atlas = host.assetManager.require("full-pet.atlas");
       const json = host.assetManager.require("full-pet.json");
-      actionMesh = host.assetManager.require("action-mesh-30.json");
       const loader = new spine.AtlasAttachmentLoader(atlas);
       const skeletonJson = new spine.SkeletonJson(loader);
       const skeletonData = skeletonJson.readSkeletonData(json);
@@ -765,14 +1153,14 @@ const app = {
       document.querySelector("#renderer-value");
       setPill(spineStatus, "Spine 已连接", "ok");
       setPill(gpuStatus, "WebGL GPU 已启用", "ok");
-      setPill(rigStatus, "整帧姿态已启用", "ok");
-      rigStatus.title = `整帧照片姿态 · Spine GPU 渲染 · ${actionMesh.sampleCount || 30} 点动作数据已保留`;
-      window.__jujuDiagnostics.actionMeshLoaded = true;
-      window.__jujuDiagnostics.actionMeshSampleCount = Number(actionMesh.sampleCount) || 0;
+      setPill(rigStatus, "整帧资源已启用", "ok");
+      rigStatus.title = "当前资产为单 root 整帧 Spine；分层 rig/动作网格仅保留为后续资产输入，未伪称激活";
       if (name) gpuStatus.title = name;
       loadingElement.hidden = true;
       updateStatusUI();
       updateQualityUI();
+      startDecayTimer();
+      startWanderTimer();
       scheduleAutoBehavior();
     } catch (error) {
       setError(`Spine 资源解析失败：\n${error.message}`);
@@ -783,11 +1171,11 @@ const app = {
     if (!skeleton || !animationState) return;
     const cappedDelta = Math.max(0, Math.min(Number(delta) || 0, 0.05));
     motionAccumulator = Math.min(motionAccumulator + cappedDelta, 0.25);
-    // Spine already interpolates its timelines against real elapsed time.
-    // Replaying the same frame in 3–15 tiny substeps per display refresh only
-    // burns CPU in WebView2 (especially inside a transparent WPF window) and
-    // creates visible hitching on slower machines. Consume the accumulated
-    // time once; the quality setting remains the user's target motion tier.
+    const targetInterval = 1 / (hostState.reducedMotion ? Math.min(quality, 30) : quality);
+    if (hostState.paused || hostState.locked || motionAccumulator < targetInterval) {
+      updateFrameTelemetry(cappedDelta);
+      return;
+    }
     const step = motionAccumulator;
     motionAccumulator = 0;
     if (step > 0) advanceMotion(step);
@@ -806,9 +1194,11 @@ const app = {
   error: (_host, errors) => setError(`资源加载失败：\n${Object.values(errors).join("\n")}`),
 };
 
+ensureDailySupply();
 applyElapsedDecay();
 saveState();
 updateStatusUI();
+startDecayTimer();
 
 try {
   spineCanvas = new spine.SpineCanvas(canvasElement, {

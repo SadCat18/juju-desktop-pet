@@ -1,0 +1,17 @@
+name: Jioj checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  web:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node --check spine-poc/app.js
+      - run: node spine-poc/scripts/sync-android-assets.mjs --check
+      - run: node spine-poc/qa/product-smoke.mjs

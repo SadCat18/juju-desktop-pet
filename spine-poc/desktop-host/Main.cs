@@ -6,15 +6,21 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Interop;
+using System.Windows.Threading;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
 using Forms = System.Windows.Forms;
+using JsonDictionary = System.Collections.Generic.Dictionary<string, object>;
+using JsonSerializer = System.Web.Script.Serialization.JavaScriptSerializer;
 
 internal sealed class App : Application
 {
@@ -54,6 +60,21 @@ internal sealed class MainWindow : Window
 {
     private const int WmNcLButtonDown = 0x00A1;
     private const int HtCaption = 0x0002;
+    private const int PositionSaveDebounceMilliseconds = 250;
+    private const int SystemStatePollMilliseconds = 2000;
+    private const int MaxStateBytes = 512 * 1024;
+
+    private enum UserNotificationState
+    {
+        NotPresent = 1,
+        Busy = 2,
+        RunningD3dFullScreen = 3,
+        PresentationMode = 4,
+        AcceptsNotifications = 5,
+        QuietTime = 6,
+        RunningApp = 7,
+        BatterySaver = 8,
+    }
 
     [DllImport("user32.dll")]
     private static extern bool ReleaseCapture();
@@ -64,17 +85,37 @@ internal sealed class MainWindow : Window
     [DllImport("user32.dll")]
     private static extern bool SetForegroundWindow(IntPtr handle);
 
+    [DllImport("shell32.dll")]
+    private static extern int SHQueryUserNotificationState(out UserNotificationState state);
+
+    [DllImport("user32.dll")]
+    private static extern bool DestroyIcon(IntPtr handle);
+
     private readonly string contentRoot;
     private readonly WebView2CompositionControl webView;
     private readonly LocalServer server;
+    private readonly string dataDirectory;
     private readonly string positionFile;
+    private readonly string stateFile;
+    private readonly JsonSerializer json = new JsonSerializer { MaxJsonLength = MaxStateBytes };
+    private readonly DispatcherTimer positionSaveTimer;
+    private readonly DispatcherTimer systemStateTimer;
     private Forms.NotifyIcon trayIcon;
+    private Drawing.Icon trayIconImage;
+    private string restoredStateJson;
+    private bool systemBusy;
+    private bool sessionLocked;
+    private bool initialized;
+    private bool closing;
 
     public MainWindow(string root)
     {
         contentRoot = root;
         server = new LocalServer(contentRoot);
-        positionFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "JiuJiuSpinePet", "window-position.txt");
+        dataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "JiuJiuSpinePet");
+        positionFile = Path.Combine(dataDirectory, "window-position.txt");
+        stateFile = Path.Combine(dataDirectory, "pet-state.json");
+        restoredStateJson = LoadState();
 
         Title = "啾啾桌宠";
         // Keep the transparent hit-test surface close to the pet bounds;
@@ -114,8 +155,20 @@ internal sealed class MainWindow : Window
 
         RestorePosition();
 
+        positionSaveTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(PositionSaveDebounceMilliseconds) };
+        positionSaveTimer.Tick += delegate
+        {
+            positionSaveTimer.Stop();
+            SavePosition();
+        };
+        systemStateTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(SystemStatePollMilliseconds) };
+        systemStateTimer.Tick += delegate { RefreshSystemMode(); };
+
+        SourceInitialized += delegate { ClampToCurrentWorkArea(); };
         Loaded += OnLoaded;
         Closed += OnClosed;
+        LocationChanged += OnLocationChanged;
+        SystemEvents.SessionSwitch += OnSessionSwitch;
         SetupTrayIcon();
     }
 
@@ -133,7 +186,11 @@ internal sealed class MainWindow : Window
             webView.CoreWebView2.Settings.AreDevToolsEnabled = false;
             webView.CoreWebView2.Settings.IsStatusBarEnabled = false;
             webView.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
+            webView.CoreWebView2.NavigationCompleted += OnNavigationCompleted;
             webView.Source = new Uri(server.Url + "?host=desktop");
+            initialized = true;
+            systemStateTimer.Start();
+            RefreshSystemMode();
         }
         catch (Exception error)
         {
@@ -142,9 +199,62 @@ internal sealed class MainWindow : Window
         }
     }
 
+    private void OnNavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
+    {
+        if (!e.IsSuccess) return;
+        if (restoredStateJson != null) SendRestoredState();
+        SendSystemModeMessage();
+    }
+
     private void OnWebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
     {
-        string message = e.TryGetWebMessageAsString();
+        string raw;
+        try
+        {
+            raw = e.WebMessageAsJson;
+        }
+        catch
+        {
+            try { raw = json.Serialize(e.TryGetWebMessageAsString()); }
+            catch { return; }
+        }
+
+        object value;
+        try { value = json.DeserializeObject(raw); }
+        catch { return; }
+
+        string message = value as string;
+        if (message != null)
+        {
+            HandleCommand(message);
+            return;
+        }
+
+        IDictionary<string, object> payload = value as IDictionary<string, object>;
+        if (payload == null) return;
+        string type = ReadString(payload, "type");
+        if (type == "notify")
+        {
+            ShowNotification(ReadString(payload, "message"));
+        }
+        else if (type == "state-save")
+        {
+            SaveStateFromMessage(payload);
+        }
+        else if (type == "host-command")
+        {
+            HandleCommand(ReadString(payload, "command"));
+        }
+    }
+
+    private void HandleCommand(string message)
+    {
+        if (String.IsNullOrWhiteSpace(message)) return;
+        if (message.StartsWith("notify:", StringComparison.OrdinalIgnoreCase))
+        {
+            ShowNotification(message.Substring("notify:".Length));
+            return;
+        }
         if (message == "drag-window")
         {
             BeginNativeDrag();
@@ -157,6 +267,208 @@ internal sealed class MainWindow : Window
         {
             WindowState = WindowState.Minimized;
         }
+        else if (message == "show-window")
+        {
+            ShowWindow();
+        }
+    }
+
+    private static string ReadString(IDictionary<string, object> payload, string name)
+    {
+        object value;
+        return payload.TryGetValue(name, out value) ? value as string : null;
+    }
+
+    private void ShowNotification(string message)
+    {
+        if (trayIcon == null || String.IsNullOrWhiteSpace(message)) return;
+        string text = message.Trim();
+        if (text.Length > 256) text = text.Substring(0, 256);
+        trayIcon.ShowBalloonTip(3200, "啾啾", text, Forms.ToolTipIcon.Info);
+    }
+
+    private void SaveStateFromMessage(IDictionary<string, object> payload)
+    {
+        object state;
+        if (!payload.TryGetValue("state", out state)) return;
+        string stateJson = state as string;
+        if (stateJson == null)
+        {
+            try { stateJson = json.Serialize(state); }
+            catch { return; }
+        }
+        if (!IsSafeStateJson(stateJson)) return;
+        try
+        {
+            AtomicWriteUtf8(stateFile, stateJson);
+            restoredStateJson = stateJson;
+        }
+        catch (Exception error)
+        {
+            Debug.WriteLine("无法保存啾啾存档：" + error.Message);
+        }
+    }
+
+    private string LoadState()
+    {
+        try
+        {
+            FileInfo file = new FileInfo(stateFile);
+            if (!file.Exists || file.Length > MaxStateBytes) return null;
+            string candidate = File.ReadAllText(stateFile, new UTF8Encoding(false, true));
+            return IsSafeStateJson(candidate) ? candidate : null;
+        }
+        catch (Exception error)
+        {
+            Debug.WriteLine("无法读取啾啾存档：" + error.Message);
+            return null;
+        }
+    }
+
+    private bool IsSafeStateJson(string stateJson)
+    {
+        if (String.IsNullOrWhiteSpace(stateJson) || Encoding.UTF8.GetByteCount(stateJson) > MaxStateBytes) return false;
+        try
+        {
+            object value = json.DeserializeObject(stateJson);
+            IDictionary<string, object> root = value as IDictionary<string, object>;
+            if (root == null) return false;
+            if (!ValidObjectSection(root, "stats") || !ValidObjectSection(root, "inventory") || !ValidObjectSection(root, "settings") || !ValidObjectSection(root, "record")) return false;
+            IDictionary<string, object> stats = GetObjectSection(root, "stats");
+            if (stats != null && !ValidRange(stats, "hunger", 0, 100) || stats != null && !ValidRange(stats, "thirst", 0, 100) || stats != null && !ValidRange(stats, "energy", 0, 100) || stats != null && !ValidRange(stats, "cleanliness", 0, 100) || stats != null && !ValidRange(stats, "happiness", 0, 100)) return false;
+            IDictionary<string, object> inventory = GetObjectSection(root, "inventory");
+            if (inventory != null && !ValidRange(inventory, "food", 0, 100000) || inventory != null && !ValidRange(inventory, "water", 0, 100000)) return false;
+            return true;
+        }
+        catch { return false; }
+    }
+
+    private static bool ValidObjectSection(IDictionary<string, object> root, string name)
+    {
+        object section;
+        return !root.TryGetValue(name, out section) || section is IDictionary<string, object>;
+    }
+
+    private static IDictionary<string, object> GetObjectSection(IDictionary<string, object> root, string name)
+    {
+        object value;
+        return root.TryGetValue(name, out value) ? value as IDictionary<string, object> : null;
+    }
+
+    private static bool ValidRange(IDictionary<string, object> values, string name, double minimum, double maximum)
+    {
+        object value;
+        if (!values.TryGetValue(name, out value)) return true;
+        double number;
+        try { number = Convert.ToDouble(value, CultureInfo.InvariantCulture); }
+        catch { return false; }
+        return !Double.IsNaN(number) && !Double.IsInfinity(number) && number >= minimum && number <= maximum;
+    }
+
+    private void SendRestoredState()
+    {
+        object state;
+        try { state = json.DeserializeObject(restoredStateJson); }
+        catch { return; }
+        SendHostMessage(new JsonDictionary
+        {
+            { "type", "host-state" },
+            { "event", "restore-state" },
+            { "state", state }
+        });
+    }
+
+    private void SendSystemModeMessage()
+    {
+        bool paused = systemBusy || sessionLocked;
+        SendHostMessage(new JsonDictionary
+        {
+            { "type", "host-state" },
+            { "event", "system-mode" },
+            { "paused", paused },
+            { "reduceMotion", paused },
+            { "reason", sessionLocked ? "locked" : systemBusy ? "fullscreen" : "normal" }
+        });
+    }
+
+    private void SendHostMessage(JsonDictionary message)
+    {
+        if (!initialized || webView.CoreWebView2 == null) return;
+        try { webView.CoreWebView2.PostWebMessageAsJson(json.Serialize(message)); }
+        catch (InvalidOperationException) { }
+    }
+
+    private void RefreshSystemMode()
+    {
+        bool busy = IsSystemBusy();
+        if (busy == systemBusy && initialized) return;
+        systemBusy = busy;
+        Topmost = !systemBusy && !sessionLocked;
+        SendSystemModeMessage();
+    }
+
+    private static bool IsSystemBusy()
+    {
+        try
+        {
+            UserNotificationState state;
+            int result = SHQueryUserNotificationState(out state);
+            if (result != 0) return false;
+            return state == UserNotificationState.Busy
+                || state == UserNotificationState.RunningD3dFullScreen
+                || state == UserNotificationState.PresentationMode
+                || state == UserNotificationState.RunningApp;
+        }
+        catch (Exception error)
+        {
+            Debug.WriteLine("无法检测 Windows 通知状态：" + error.Message);
+            return false;
+        }
+    }
+
+    private void OnSessionSwitch(object sender, SessionSwitchEventArgs e)
+    {
+        if (e.Reason != SessionSwitchReason.SessionLock && e.Reason != SessionSwitchReason.SessionUnlock) return;
+        Dispatcher.BeginInvoke(new Action(delegate
+        {
+            if (closing) return;
+            if (e.Reason == SessionSwitchReason.SessionLock)
+            {
+                sessionLocked = true;
+                Topmost = false;
+                SendSystemModeMessage();
+                SendHostMessage(new JsonDictionary
+                {
+                    { "type", "host-state" },
+                    { "event", "session-lock" },
+                    { "animation", "sleeping" },
+                    { "paused", true },
+                    { "reduceMotion", true }
+                });
+            }
+            else
+            {
+                sessionLocked = false;
+                Topmost = !systemBusy;
+                SendSystemModeMessage();
+                SendHostMessage(new JsonDictionary
+                {
+                    { "type", "host-state" },
+                    { "event", "session-unlock" },
+                    { "greeting", TimeGreeting() },
+                    { "paused", systemBusy },
+                    { "reduceMotion", systemBusy }
+                });
+            }
+        }));
+    }
+
+    private static string TimeGreeting()
+    {
+        int hour = DateTime.Now.Hour;
+        if (hour >= 5 && hour < 11) return "早安，啾啾回来啦";
+        if (hour >= 23 || hour < 5) return "晚安，啾啾陪你安静一会儿";
+        return "欢迎回来，啾啾一直在等你";
     }
 
     private void BeginNativeDrag()
@@ -183,22 +495,6 @@ internal sealed class MainWindow : Window
         SendMessage(handle, WmNcLButtonDown, new IntPtr(HtCaption), IntPtr.Zero);
     }
 
-    private void SetupTrayIcon()
-    {
-        trayIcon = new Forms.NotifyIcon
-        {
-            Icon = Drawing.SystemIcons.Application,
-            Text = "啾啾桌宠",
-            Visible = true
-        };
-        trayIcon.DoubleClick += delegate { ShowWindow(); };
-
-        Forms.ContextMenuStrip menu = new Forms.ContextMenuStrip();
-        menu.Items.Add("显示啾啾", null, delegate { ShowWindow(); });
-        menu.Items.Add("退出啾啾", null, delegate { Close(); });
-        trayIcon.ContextMenuStrip = menu;
-    }
-
     private void ShowWindow()
     {
         Show();
@@ -208,13 +504,28 @@ internal sealed class MainWindow : Window
 
     private void OnClosed(object sender, EventArgs e)
     {
+        closing = true;
+        positionSaveTimer.Stop();
+        systemStateTimer.Stop();
+        SystemEvents.SessionSwitch -= OnSessionSwitch;
         SavePosition();
         if (trayIcon != null)
         {
             trayIcon.Visible = false;
             trayIcon.Dispose();
         }
+        if (trayIconImage != null) trayIconImage.Dispose();
+        if (webView.CoreWebView2 != null)
+        {
+            webView.CoreWebView2.WebMessageReceived -= OnWebMessageReceived;
+            webView.CoreWebView2.NavigationCompleted -= OnNavigationCompleted;
+        }
         server.Dispose();
+    }
+
+    private void OnLocationChanged(object sender, EventArgs e)
+    {
+        if (!closing && IsLoaded) positionSaveTimer.Start();
     }
 
     private void RestorePosition()
@@ -227,12 +538,28 @@ internal sealed class MainWindow : Window
             double top;
             if (values.Length >= 2 && double.TryParse(values[0], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out left) && double.TryParse(values[1], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out top))
             {
-                System.Windows.Rect workArea = SystemParameters.WorkArea;
-                Left = Math.Max(workArea.Left, Math.Min(left, workArea.Right - Width));
-                Top = Math.Max(workArea.Top, Math.Min(top, workArea.Bottom - Height));
+                Left = left;
+                Top = top;
+                ClampToCurrentWorkArea();
             }
         }
         catch { }
+    }
+
+    private void ClampToCurrentWorkArea()
+    {
+        System.Windows.Rect workArea = CurrentWorkArea();
+        Left = Math.Max(workArea.Left, Math.Min(Left, workArea.Right - Width));
+        Top = Math.Max(workArea.Top, Math.Min(Top, workArea.Bottom - Height));
+    }
+
+    private System.Windows.Rect CurrentWorkArea()
+    {
+        IntPtr handle = new WindowInteropHelper(this).Handle;
+        Drawing.Rectangle pixels = handle == IntPtr.Zero
+            ? Forms.Screen.FromPoint(new Drawing.Point((int)Math.Round(Left), (int)Math.Round(Top))).WorkingArea
+            : Forms.Screen.FromHandle(handle).WorkingArea;
+        return new System.Windows.Rect(pixels.Left, pixels.Top, pixels.Width, pixels.Height);
     }
 
     private void SavePosition()
@@ -240,14 +567,82 @@ internal sealed class MainWindow : Window
         try
         {
             string directory = Path.GetDirectoryName(positionFile);
-            Directory.CreateDirectory(directory);
-            File.WriteAllLines(positionFile, new[]
+            string position = String.Join("\n", new[]
             {
                 Left.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 Top.ToString(System.Globalization.CultureInfo.InvariantCulture)
             });
+            AtomicWriteUtf8(positionFile, position);
         }
         catch { }
+    }
+
+    private static void AtomicWriteUtf8(string path, string contents)
+    {
+        string directory = Path.GetDirectoryName(path);
+        Directory.CreateDirectory(directory);
+        string temporary = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
+        try
+        {
+            byte[] bytes = new UTF8Encoding(false).GetBytes(contents);
+            using (FileStream output = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            {
+                output.Write(bytes, 0, bytes.Length);
+                output.Flush(true);
+            }
+            if (File.Exists(path)) File.Replace(temporary, path, null);
+            else File.Move(temporary, path);
+        }
+        finally
+        {
+            if (File.Exists(temporary))
+            {
+                try { File.Delete(temporary); } catch { }
+            }
+        }
+    }
+
+    private void SetupTrayIcon()
+    {
+        trayIconImage = LoadPetIcon();
+        trayIcon = new Forms.NotifyIcon
+        {
+            Icon = trayIconImage ?? Drawing.SystemIcons.Application,
+            Text = "啾啾桌宠",
+            Visible = true
+        };
+        trayIcon.DoubleClick += delegate { ShowWindow(); };
+
+        Forms.ContextMenuStrip menu = new Forms.ContextMenuStrip();
+        menu.Items.Add("显示啾啾", null, delegate { ShowWindow(); });
+        menu.Items.Add("退出啾啾", null, delegate { Close(); });
+        trayIcon.ContextMenuStrip = menu;
+    }
+
+    private Drawing.Icon LoadPetIcon()
+    {
+        string iconSource = Path.Combine(contentRoot, "spine", "rig-head.png");
+        if (!File.Exists(iconSource)) return null;
+        try
+        {
+            using (Drawing.Bitmap bitmap = new Drawing.Bitmap(iconSource))
+            {
+                IntPtr handle = bitmap.GetHicon();
+                try
+                {
+                    using (Drawing.Icon source = Drawing.Icon.FromHandle(handle))
+                    {
+                        return new Drawing.Icon(source, new Drawing.Size(16, 16));
+                    }
+                }
+                finally { DestroyIcon(handle); }
+            }
+        }
+        catch (Exception error)
+        {
+            Debug.WriteLine("无法加载啾啾托盘图标：" + error.Message);
+            return null;
+        }
     }
 }
 

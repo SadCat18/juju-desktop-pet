@@ -12,9 +12,7 @@ const port = 9229;
 const desktopMode = process.env.JUJU_DESKTOP_MODE === "1";
 const query = new URLSearchParams();
 if (desktopMode) query.set("host", "desktop");
-if (process.env.JUJU_ACTION_RENDERER) query.set("action-renderer", process.env.JUJU_ACTION_RENDERER);
 const pageSuffix = query.toString() ? `?${query}` : "";
-const photoFlowFallback = process.env.JUJU_ACTION_RENDERER === "photo-flow";
 const chrome = spawn(chromePath, [
   "--headless=new",
   "--no-sandbox",
@@ -87,13 +85,42 @@ assert.equal(await evaluate("document.querySelector('#gpu-status')?.textContent"
 const diagnostics = await evaluate("window.__jujuDiagnostics");
 assert.equal(diagnostics?.spineInterpolation, true, "Spine 时间线补帧未启用");
 assert.equal(diagnostics?.photoFrameBlend, true, "照片动作平滑过渡未启用");
-assert.equal(diagnostics?.actionMeshLoaded, true, "Spine 30 点动作资产未加载");
-assert.equal(diagnostics?.actionMeshActive, !photoFlowFallback, "Spine 30 点动作模式启用状态错误");
-assert.equal(diagnostics?.actionMeshSampleCount, 30, "动作网格采样数错误");
-assert.ok([60, 180, 300].includes(diagnostics?.targetMotionHz), "动作目标频率无效");
+assert.equal(diagnostics?.actionMeshLoaded, false, "不存在的动作网格不能报告为已加载");
+assert.equal(diagnostics?.actionMeshActive, false, "不存在的动作网格不能报告为已激活");
+assert.equal(diagnostics?.actionMeshSampleCount, 0, "动作网格未应用时采样数应为 0");
+assert.equal(diagnostics?.photoActionRenderer, "photo-flow", "当前动作渲染路径应如实标记");
+assert.ok([30, 60, 90].includes(diagnostics?.targetMotionHz), "动画更新档位无效");
 assert.equal(diagnostics?.petScale, 100, "桌宠默认大小错误");
 await evaluate("(() => { const input = document.querySelector('#scale-range'); input.value = '125'; input.dispatchEvent(new Event('input', { bubbles: true })); })()");
 assert.equal(await evaluate("window.__jujuDiagnostics.petScale"), 125, "桌宠大小未实时更新");
+assert.equal(await evaluate("document.querySelector('#mute-toggle') !== null && document.querySelector('#volume-range') !== null"), true, "声音设置缺失");
+assert.equal(await evaluate("document.querySelector('#equipment-toggle') !== null && document.querySelector('#play-ball') !== null"), true, "装备或小球互动缺失");
+
+await evaluate("document.querySelector('#stage').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 20, clientY: 20 }))");
+assert.equal(await evaluate("document.querySelector('#context-menu')?.hidden"), false, "HTML 右键菜单未打开");
+await evaluate("document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))");
+assert.equal(await evaluate("document.querySelector('#context-menu')?.hidden"), true, "Esc 未关闭右键菜单");
+
+await evaluate("window.postMessage({ type: 'host-state', paused: true, reduceMotion: true, locked: false, timeOfDay: 'day' }, '*')");
+await sleep(80);
+assert.equal(await evaluate("document.body.classList.contains('host-paused')"), true, "宿主暂停消息未驱动页面状态");
+assert.equal((await evaluate("window.__jujuDiagnostics")).targetMotionHz, 30, "宿主降帧消息未生效");
+await evaluate("window.postMessage({ type: 'host-state', event: 'session-lock', reduceMotion: true }, '*')");
+await sleep(80);
+assert.equal(await evaluate("document.body.classList.contains('host-locked')"), true, "锁屏消息未驱动页面状态");
+await evaluate("window.postMessage({ type: 'host-state', event: 'session-unlock', greeting: '早安，啾啾回来了' }, '*')");
+await sleep(80);
+assert.equal(await evaluate("document.body.classList.contains('host-locked')"), false, "解锁消息未恢复页面状态");
+await evaluate("window.postMessage({ type: 'host-state', paused: false, reduceMotion: false, locked: false, timeOfDay: 'day' }, '*')");
+await sleep(80);
+
+await evaluate("(() => { state.inventory.food = 0; state.dailySupplyDate = '2000-01-01'; ensureDailySupply(); updateStatusUI(); })()");
+assert.equal(await evaluate("state.inventory.food"), 5, "跨日补给未恢复归零库存");
+await evaluate("(() => { state.stats = { hunger: 0, thirst: 0, energy: 0, cleanliness: 0, happiness: 0 }; state.lastUpdated = Date.now() - 7 * 24 * 60 * 60000; applyElapsedDecay(); updateStatusUI(); })()");
+const recoveredStats = await evaluate("state.stats");
+assert.ok(Object.values(recoveredStats).every((value) => value >= 15), "离线衰减没有保底");
+await evaluate("(() => { state.stats.hunger = 20; state.stats.thirst = 20; lastNeedAlert = ''; updateStatusUI(); })()");
+assert.equal(await evaluate("document.querySelector('#pet-bubble')?.classList.contains('visible')"), true, "低饥饿/口渴未显示页面提醒");
 
 if (desktopMode) {
   assert.equal(await evaluate("document.body.classList.contains('desktop-mode')"), true, "桌面模式未启用");
@@ -162,7 +189,7 @@ fs.writeFileSync(path.join(root, "qa", "layered-feeding.png"), Buffer.from(scree
 
 const state = await evaluate("JSON.parse(localStorage.getItem('juju-pet-state-v2'))");
 assert.ok(state?.inventory && Number.isFinite(state.inventory.food), "库存存档缺失");
-assert.ok(state?.settings?.quality === 180 || state?.settings?.quality === 300 || state?.settings?.quality === 60, "刷新率存档缺失");
+assert.ok(state?.settings?.quality === 90 || state?.settings?.quality === 60 || state?.settings?.quality === 30, "动画更新档位存档缺失");
 assert.equal(state?.settings?.scale, 125, "桌宠大小未保存");
 const finalDiagnostics = await evaluate("window.__jujuDiagnostics");
 assert.ok(finalDiagnostics.simulationFrames > 60, "动作时间步进未持续运行");

@@ -1,46 +1,42 @@
 # 啾啾 Spine 2D + GPU 桌宠
 
-这是独立的可运行产品切片；稳定回退包已同步为当前无背带造型。
+这是啾啾的 Web 产品切片，也是 Windows 宿主和 Android 悬浮窗共用的 Web 资产源。
 
 ## 启动
 
-桌面宠物版：双击 `启动啾啾桌宠.cmd`。它会编译并启动透明、置顶、带托盘的原生宿主；这个入口才是可拖动、可点击照顾面板的版本。
+- 桌面宠物版：双击 `启动啾啾桌宠.cmd`。正式入口会启动当前 WPF + WebView2 宿主。
+- 浏览器体验版：双击 `启动Spine原型.cmd`，或在本目录运行 `node .\server.mjs --open`，访问 `http://127.0.0.1:8765/`。
+- 不要直接打开 `desktop-host\legacy` 中的历史宿主或其它旧 EXE。
 
-浏览器体验版：双击 `启动Spine原型.cmd`，或在本目录运行：
+## 当前能力
+
+- 使用 Spine runtime 4.2.120 和 WebGL 渲染现有 `full-pet.json` / `full-pet.atlas`。
+- 当前骨架实际只有一个 `root` 骨骼和整帧 `pet` 槽；喂食、喝水使用现有照片帧在 `real-action` / `real-action-next` 两槽间短时平滑过渡。
+- `action-mesh-30.json` 与 `rig-*.png` 是后续真实分层 rig/网格制作的输入资料；由于当前 JSON 没有对应骨骼/槽位，运行时不会加载或伪称动作网格已激活。
+- 饱腹、水分、精力、整洁、心情、库存、成长和成就保存在 `localStorage`（`juju-pet-state-v2`）。库存每天按本地日期补给食物/饮水各 5 份，上限各 10 份；状态前台每 60 秒按 `lastUpdated` 连续衰减，离线恢复各维最低 15。
+- 饥饿或口渴低于 25 时，页面显示气泡并切换等待动作；若存在宿主，会发送 `notify:...`。动作完成后会明确显示本次消耗和剩余库存。
+- 支持单击摸头、快速双击跳跳、移动拖动；画布右键打开 HTML 快捷菜单。桌面模式有小球拖掷、空闲漫步、清洁可见灰尘和可关闭的本地小花领巾装饰。
+- 面板提供声音/静音/音量、动画更新 30/60/90 FPS、大小、导出/导入 JSON、成长成就和本地回应占位。对话模型、云端跨设备同步没有接入，不会伪称已连接或上传数据。
+- 页面接收 `host-state` JSON（`paused`、`reducedMotion`、`locked`、`timeOfDay`）以及 `state-restore` 消息；未知宿主消息会被忽略。暂停/锁屏时页面停止动画推进并在夜间进入睡觉状态。
+
+## Android Web 资产同步
+
+Android 不再手工维护 Web 双份。修改本目录的 `app.js`、`index.html`、`app.css` 或 `spine/` 后，从仓库根目录运行：
 
 ```powershell
-node .\server.mjs --open
+& 'D:\Program Files\nodejs\node.exe' .\spine-poc\scripts\sync-android-assets.mjs
+& 'D:\Program Files\nodejs\node.exe' .\spine-poc\scripts\sync-android-assets.mjs --check
 ```
 
-然后访问 `http://127.0.0.1:8765/`。
-
-底层宿主入口仍保留在 `desktop-host/启动啾啾桌宠.cmd`；每次启动都会重新编译小型宿主，避免误用旧 EXE。不要直接打开 `desktop-host\legacy` 中的历史宿主，也不要直接双击其它 EXE；当前唯一正式桌面入口是上面的启动脚本。
-
-## 已验证的链路
-
-- 官方 `@esotericsoftware/spine-webgl` 4.2.120 runtime。
-- `SpineCanvas` 创建 WebGL 上下文，由 GPU 绘制 Spine skeleton。
-- Spine JSON + Atlas 资源加载、AnimationState 动画混合。
-- 待机、等你、握手、喂食、喝水、玩球、睡觉、清洁动作切换。
-- 饱腹、水分、精力、整洁、心情状态；食物和水库存；互动次数记录。
-- 自动行为、15/30/60 分钟间隔、60/180/300Hz 动作时间步进档位，全部保存在浏览器存档中。
-- 桌面模式中点击啾啾可拖动窗口，☰ 打开照顾面板；面板标题栏的“← 返回桌宠”或 Esc 可返回桌宠，− 最小化，× 退出；窗口位置保存在本机。
-- 桌面宿主的透明点击范围已收紧到约 `380×420` DIPs，围绕啾啾主体保留必要的拖动和悬停按钮空间，避免挡住旁边桌面内容。
-- 指针拖动的平滑跟随与松手惯性。
-- 实时 FPS 与 GPU renderer 信息显示；默认喂食/喝水使用 30 点 Spine 动作网格，在相邻采样姿态间连续插值。需要对照照片动作时，可用 `?action-renderer=photo-flow` 切回相邻照片的短时平滑过渡。
-- 分层骨骼 region rig：身体、头部、左右耳、左右前爪、尾巴独立驱动；当前初始造型为无装备的真实白狗，喂食/喝水/玩球 props 也由 Spine attachment 控制。背带等装备暂不进入初始造型，后续作为可开关的装备/衣服系统加入。
-
-## 当前边界
-
-当前版本已将高频动作切换为分层 region attachment：身体、头部、耳朵、前爪、尾巴与道具通过骨骼连续插值，初始造型不显示背带，喂食/喝水/玩球会显示对应的饭碗、水碗、小球。喂食和喝水默认读取 `spine/action-mesh-30.json` 的 30 个连续采样姿态，并在运行时按真实 delta 和设置档位插值；旧照片序列仍保留在 atlas 中，可通过 `?action-renderer=photo-flow` 作为视觉回退和对照。旧背带源图保留为 `spine/spritesheet-with-gear-legacy.png`，暂不由运行时引用。
-
-当前边界是这些分层资源由现有透明动作素材确定性拆分得到，还没有完整 Spine 编辑器导出的网格权重、IK 约束和物理骨骼；照片动作的真正像素级中间帧仍需要更多连续姿势素材或专门的光流/网格制作流程，当前过渡不会伪装成真实新照片。
-
-运行时来自 Spine Runtimes，版本固定为 4.2.120；当前桌面宿主已经嵌入同一套渲染层，后续只需替换分层资产并重新打包即可。
+脚本会重建 `android-pet/app/src/main/assets/` 中的 Web 文件、Spine 资源和 runtime；`--check` 只校验、不写入。Android 仍使用移动参数，因此面板的 Esc 和“返回桌宠”路径会保留。
 
 ## 自检
 
+在仓库根目录运行：
+
 ```powershell
-node .\qa\product-smoke.mjs
-node --check .\app.js
+& 'D:\Program Files\nodejs\node.exe' --check .\spine-poc\app.js
+& 'D:\Program Files\nodejs\node.exe' .\spine-poc\qa\product-smoke.mjs
+& 'D:\Program Files\nodejs\node.exe' .\spine-poc\qa\browser-regression.mjs
+& 'D:\Program Files\nodejs\node.exe' .\spine-poc\qa\runtime-visual-check.mjs
 ```

@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 setlocal
 set "HOST_DIR=%~dp0desktop-host"
 call "%HOST_DIR%\build-desktop-host.cmd"

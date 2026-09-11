@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "action": "feeding-real",
+  "frameCount": 30,
+  "sourceKeyframes": [
+    "spine\\feeding-real-0.png",
+    "spine\\feeding-real-1.png",
+    "spine\\feeding-real-2.png",
+    "spine\\feeding-real-3.png",
+    "spine\\feeding-real-4.png",
+    "spine\\feeding-real-5.png"
+  ],
+  "keyframeIndices": [
+    0,
+    6,
+    12,
+    18,
+    24,
+    29
+  ],
+  "method": "bidirectional-coarse-to-fine-horn-schunck-premultiplied-rgba-warp",
+  "outputDir": "spine\\interpolated-flow-20260910\\feeding-real",
+  "contactSheet": "spine\\interpolated-flow-20260910\\feeding-real-contact-sheet.png"
+}

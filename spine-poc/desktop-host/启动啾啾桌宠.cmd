@@ -1,7 +1,8 @@
 @echo off
+chcp 65001 >nul
 setlocal
 cd /d "%~dp0"
-rem Always rebuild the small host so a copied folder cannot silently launch a stale binary.
+rem Build only when Main.cs or this script is newer than the host executable.
 call "%~dp0build-desktop-host.cmd"
 if errorlevel 1 (
   pause

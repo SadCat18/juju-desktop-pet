@@ -6,14 +6,19 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Build;
+import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.net.Uri;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,6 +28,14 @@ import android.content.pm.ServiceInfo;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebViewClient;
+
+import androidx.webkit.WebViewAssetLoader;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public final class PetOverlayService extends Service {
     private static final String CHANNEL_ID = "juju-pet";
@@ -42,6 +55,10 @@ public final class PetOverlayService extends Service {
     private float downRawY;
     private int downWindowX;
     private int downWindowY;
+    private BroadcastReceiver batteryReceiver;
+    private boolean batteryStateKnown;
+    private boolean lastCharging;
+    private boolean lastLowBattery;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -97,6 +114,8 @@ public final class PetOverlayService extends Service {
 
     @Override
     public void onDestroy() {
+        unregisterBatteryReceiver();
+        mainHandler.removeCallbacksAndMessages(null);
         if (webView != null) {
             try {
                 windowManager.removeView(webView);
@@ -128,8 +147,8 @@ public final class PetOverlayService extends Service {
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
-        settings.setAllowFileAccess(true);
-        settings.setAllowContentAccess(true);
+        settings.setAllowFileAccess(false);
+        settings.setAllowContentAccess(false);
         settings.setMediaPlaybackRequiresUserGesture(true);
         settings.setSupportZoom(false);
         settings.setBuiltInZoomControls(false);
@@ -141,8 +160,22 @@ public final class PetOverlayService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             settings.setAlgorithmicDarkeningAllowed(false);
         }
-        settings.setAllowFileAccessFromFileURLs(true);
         settings.setAllowUniversalAccessFromFileURLs(false);
+        WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+                .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
+                .build();
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                return assetLoader.shouldInterceptRequest(request.getUrl());
+            }
+
+            @Override
+            @SuppressWarnings("deprecation")
+            public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+                return assetLoader.shouldInterceptRequest(Uri.parse(url));
+            }
+        });
         webView.addJavascriptInterface(new AndroidBridge(), "Android");
         webView.setOnTouchListener(this::handleTouch);
 
@@ -152,7 +185,8 @@ public final class PetOverlayService extends Service {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
                         ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
                         : WindowManager.LayoutParams.TYPE_PHONE,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 PixelFormat.TRANSLUCENT);
         windowParams.gravity = Gravity.TOP | Gravity.START;
@@ -164,7 +198,82 @@ public final class PetOverlayService extends Service {
         windowParams.x = compactX;
         windowParams.y = compactY;
         windowManager.addView(webView, windowParams);
-        webView.loadUrl("file:///android_asset/index.html?host=desktop&mobile=1");
+        registerBatteryReceiver();
+        webView.loadUrl("https://appassets.androidplatform.net/assets/index.html?host=desktop&mobile=1");
+    }
+
+    private void registerBatteryReceiver() {
+        batteryReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                updateBatteryState(intent);
+            }
+        };
+        IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(batteryReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+            } else {
+                registerReceiver(batteryReceiver, filter);
+            }
+        } catch (RuntimeException ignored) {
+            // Battery greetings are optional; a restricted device still gets the overlay.
+            batteryReceiver = null;
+        }
+    }
+
+    private void unregisterBatteryReceiver() {
+        if (batteryReceiver == null) return;
+        try {
+            unregisterReceiver(batteryReceiver);
+        } catch (RuntimeException ignored) {
+            // Registration may have failed or the process may already be stopping.
+        }
+        batteryReceiver = null;
+    }
+
+    private void updateBatteryState(Intent intent) {
+        int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+        if (level < 0 || scale <= 0) return;
+        int percent = Math.max(0, Math.min(100, Math.round(level * 100f / scale)));
+        int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+        boolean charging = status == BatteryManager.BATTERY_STATUS_CHARGING
+                || status == BatteryManager.BATTERY_STATUS_FULL;
+        boolean lowBattery = percent <= 20 && !charging;
+        if (!batteryStateKnown) {
+            batteryStateKnown = true;
+            lastCharging = charging;
+            lastLowBattery = lowBattery;
+            return;
+        }
+        String greeting = null;
+        if (charging && !lastCharging) {
+            greeting = "充上电啦，啾啾安心陪着你";
+        } else if (lowBattery && !lastLowBattery) {
+            greeting = "手机电量有点低，记得给手机充电哦";
+        }
+        lastCharging = charging;
+        lastLowBattery = lowBattery;
+        if (greeting != null) sendBatteryMessage(percent, charging, greeting);
+    }
+
+    private void sendBatteryMessage(int level, boolean charging, String greeting) {
+        if (webView == null) return;
+        try {
+            JSONObject message = new JSONObject();
+            message.put("type", "host-state");
+            message.put("event", "battery");
+            message.put("level", level);
+            message.put("charging", charging);
+            message.put("greeting", greeting);
+            String script = "window.postMessage(" + message + ", '*')";
+            webView.post(() -> {
+                if (webView != null) webView.evaluateJavascript(script, null);
+            });
+        } catch (JSONException ignored) {
+            // Battery greetings are optional; a malformed message must not stop the pet.
+        }
     }
 
     private boolean handleTouch(View view, MotionEvent event) {

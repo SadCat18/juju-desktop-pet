@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "action": "drinking-real",
+  "frameCount": 30,
+  "sourceKeyframes": [
+    "spine\\drinking-real-0.png",
+    "spine\\drinking-real-1.png",
+    "spine\\drinking-real-2.png",
+    "spine\\drinking-real-3.png",
+    "spine\\drinking-real-4.png",
+    "spine\\drinking-real-5.png"
+  ],
+  "keyframeIndices": [
+    0,
+    6,
+    12,
+    18,
+    24,
+    29
+  ],
+  "method": "bidirectional-coarse-to-fine-horn-schunck-premultiplied-rgba-warp",
+  "outputDir": "spine\\interpolated-flow-20260910\\drinking-real",
+  "contactSheet": "spine\\interpolated-flow-20260910\\drinking-real-contact-sheet.png"
+}
