@@ -1,0 +1,455 @@
+spritesheet.png
+size: 1536, 2288
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+idle-0
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+idle-1
+bounds: 192, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+idle-2
+bounds: 384, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+idle-3
+bounds: 576, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+idle-4
+bounds: 768, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+idle-5
+bounds: 960, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+wave-0
+bounds: 0, 624, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+wave-1
+bounds: 192, 624, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+wave-2
+bounds: 384, 624, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+wave-3
+bounds: 576, 624, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+feeding-0.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+feeding-0
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+feeding-1.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+feeding-1
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+feeding-2.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+feeding-2
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+feeding-3.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+feeding-3
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+feeding-4.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+feeding-4
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+feeding-5.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+feeding-5
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+drinking-0.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+drinking-0
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+drinking-1.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+drinking-1
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+drinking-2.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+drinking-2
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+drinking-3.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+drinking-3
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+drinking-4.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+drinking-4
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+drinking-5.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+drinking-5
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+playing-0.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+playing-0
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+playing-1.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+playing-1
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+playing-2.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+playing-2
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+playing-3.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+playing-3
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+playing-4.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+playing-4
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+playing-5.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+playing-5
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+rig-tail.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+rig-tail
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+rig-body.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+rig-body
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+rig-paw-left.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+rig-paw-left
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+rig-paw-right.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+rig-paw-right
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+rig-head.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+rig-head
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+rig-ear-left.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+rig-ear-left
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+rig-ear-right.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+rig-ear-right
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+rig-head-sleep.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+rig-head-sleep
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+rig-food-bowl.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+rig-food-bowl
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+rig-water-bowl.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+rig-water-bowl
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+rig-ball.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+rig-ball
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+feeding-real-0.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+feeding-real-0
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+feeding-real-1.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+feeding-real-1
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+feeding-real-2.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+feeding-real-2
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+feeding-real-3.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+feeding-real-3
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+feeding-real-4.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+feeding-real-4
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+feeding-real-5.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+feeding-real-5
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+drinking-real-0.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+drinking-real-0
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+drinking-real-1.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+drinking-real-1
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+drinking-real-2.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+drinking-real-2
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+drinking-real-3.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+drinking-real-3
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+drinking-real-4.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+drinking-real-4
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+drinking-real-5.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+drinking-real-5
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1

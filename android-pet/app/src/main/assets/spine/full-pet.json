@@ -1,0 +1,2314 @@
+{
+  "skeleton": {
+    "hash": "juju-full-pose",
+    "spine": "4.2.120"
+  },
+  "bones": [
+    {
+      "name": "root"
+    }
+  ],
+  "slots": [
+    {
+      "name": "pet",
+      "bone": "root",
+      "attachment": "idle-0"
+    },
+    {
+      "name": "real-action",
+      "bone": "root",
+      "attachment": null
+    },
+    {
+      "name": "real-action-next",
+      "bone": "root",
+      "attachment": null
+    }
+  ],
+  "skins": [
+    {
+      "name": "default",
+      "attachments": {
+        "pet": {
+          "idle-0": {
+            "path": "idle-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "idle-1": {
+            "path": "idle-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "idle-2": {
+            "path": "idle-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "idle-3": {
+            "path": "idle-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "idle-4": {
+            "path": "idle-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "idle-5": {
+            "path": "idle-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-0": {
+            "path": "running-right-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-1": {
+            "path": "running-right-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-2": {
+            "path": "running-right-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-3": {
+            "path": "running-right-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-4": {
+            "path": "running-right-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-5": {
+            "path": "running-right-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-6": {
+            "path": "running-right-6",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-7": {
+            "path": "running-right-7",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-0": {
+            "path": "running-left-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-1": {
+            "path": "running-left-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-2": {
+            "path": "running-left-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-3": {
+            "path": "running-left-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-4": {
+            "path": "running-left-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-5": {
+            "path": "running-left-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-6": {
+            "path": "running-left-6",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-7": {
+            "path": "running-left-7",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "handshake-0": {
+            "path": "handshake-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "handshake-1": {
+            "path": "handshake-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "handshake-2": {
+            "path": "handshake-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "handshake-3": {
+            "path": "handshake-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "jumping-0": {
+            "path": "jumping-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "jumping-1": {
+            "path": "jumping-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "jumping-2": {
+            "path": "jumping-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "jumping-3": {
+            "path": "jumping-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "jumping-4": {
+            "path": "jumping-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-0": {
+            "path": "sleeping-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-1": {
+            "path": "sleeping-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-2": {
+            "path": "sleeping-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-3": {
+            "path": "sleeping-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-4": {
+            "path": "sleeping-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-5": {
+            "path": "sleeping-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-6": {
+            "path": "sleeping-6",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-7": {
+            "path": "sleeping-7",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "waiting-0": {
+            "path": "waiting-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "waiting-1": {
+            "path": "waiting-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "waiting-2": {
+            "path": "waiting-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "waiting-3": {
+            "path": "waiting-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "waiting-4": {
+            "path": "waiting-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "waiting-5": {
+            "path": "waiting-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "playing-0": {
+            "path": "playing-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "playing-1": {
+            "path": "playing-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "playing-2": {
+            "path": "playing-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "playing-3": {
+            "path": "playing-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "playing-4": {
+            "path": "playing-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "playing-5": {
+            "path": "playing-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "cleaning-0": {
+            "path": "cleaning-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "cleaning-1": {
+            "path": "cleaning-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "cleaning-2": {
+            "path": "cleaning-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "cleaning-3": {
+            "path": "cleaning-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "cleaning-4": {
+            "path": "cleaning-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "cleaning-5": {
+            "path": "cleaning-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-0": {
+            "path": "look-up-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-1": {
+            "path": "look-up-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-2": {
+            "path": "look-up-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-3": {
+            "path": "look-up-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-4": {
+            "path": "look-up-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-5": {
+            "path": "look-up-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-6": {
+            "path": "look-up-6",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-7": {
+            "path": "look-up-7",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-0": {
+            "path": "look-down-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-1": {
+            "path": "look-down-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-2": {
+            "path": "look-down-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-3": {
+            "path": "look-down-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-4": {
+            "path": "look-down-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-5": {
+            "path": "look-down-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-6": {
+            "path": "look-down-6",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-7": {
+            "path": "look-down-7",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "feeding-real-0": {
+            "path": "feeding-real-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "feeding-real-1": {
+            "path": "feeding-real-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "feeding-real-2": {
+            "path": "feeding-real-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "feeding-real-3": {
+            "path": "feeding-real-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "feeding-real-4": {
+            "path": "feeding-real-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "feeding-real-5": {
+            "path": "feeding-real-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "drinking-real-0": {
+            "path": "drinking-real-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "drinking-real-1": {
+            "path": "drinking-real-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "drinking-real-2": {
+            "path": "drinking-real-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "drinking-real-3": {
+            "path": "drinking-real-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "drinking-real-4": {
+            "path": "drinking-real-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "drinking-real-5": {
+            "path": "drinking-real-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          }
+        },
+        "real-action": {
+          "idle-0": {
+            "path": "idle-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "idle-1": {
+            "path": "idle-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "idle-2": {
+            "path": "idle-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "idle-3": {
+            "path": "idle-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "idle-4": {
+            "path": "idle-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "idle-5": {
+            "path": "idle-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-0": {
+            "path": "running-right-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-1": {
+            "path": "running-right-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-2": {
+            "path": "running-right-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-3": {
+            "path": "running-right-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-4": {
+            "path": "running-right-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-5": {
+            "path": "running-right-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-6": {
+            "path": "running-right-6",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-7": {
+            "path": "running-right-7",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-0": {
+            "path": "running-left-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-1": {
+            "path": "running-left-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-2": {
+            "path": "running-left-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-3": {
+            "path": "running-left-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-4": {
+            "path": "running-left-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-5": {
+            "path": "running-left-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-6": {
+            "path": "running-left-6",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-7": {
+            "path": "running-left-7",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "handshake-0": {
+            "path": "handshake-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "handshake-1": {
+            "path": "handshake-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "handshake-2": {
+            "path": "handshake-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "handshake-3": {
+            "path": "handshake-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "jumping-0": {
+            "path": "jumping-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "jumping-1": {
+            "path": "jumping-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "jumping-2": {
+            "path": "jumping-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "jumping-3": {
+            "path": "jumping-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "jumping-4": {
+            "path": "jumping-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-0": {
+            "path": "sleeping-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-1": {
+            "path": "sleeping-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-2": {
+            "path": "sleeping-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-3": {
+            "path": "sleeping-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-4": {
+            "path": "sleeping-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-5": {
+            "path": "sleeping-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-6": {
+            "path": "sleeping-6",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-7": {
+            "path": "sleeping-7",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "waiting-0": {
+            "path": "waiting-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "waiting-1": {
+            "path": "waiting-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "waiting-2": {
+            "path": "waiting-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "waiting-3": {
+            "path": "waiting-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "waiting-4": {
+            "path": "waiting-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "waiting-5": {
+            "path": "waiting-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "playing-0": {
+            "path": "playing-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "playing-1": {
+            "path": "playing-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "playing-2": {
+            "path": "playing-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "playing-3": {
+            "path": "playing-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "playing-4": {
+            "path": "playing-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "playing-5": {
+            "path": "playing-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "cleaning-0": {
+            "path": "cleaning-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "cleaning-1": {
+            "path": "cleaning-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "cleaning-2": {
+            "path": "cleaning-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "cleaning-3": {
+            "path": "cleaning-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "cleaning-4": {
+            "path": "cleaning-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "cleaning-5": {
+            "path": "cleaning-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-0": {
+            "path": "look-up-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-1": {
+            "path": "look-up-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-2": {
+            "path": "look-up-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-3": {
+            "path": "look-up-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-4": {
+            "path": "look-up-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-5": {
+            "path": "look-up-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-6": {
+            "path": "look-up-6",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-7": {
+            "path": "look-up-7",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-0": {
+            "path": "look-down-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-1": {
+            "path": "look-down-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-2": {
+            "path": "look-down-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-3": {
+            "path": "look-down-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-4": {
+            "path": "look-down-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-5": {
+            "path": "look-down-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-6": {
+            "path": "look-down-6",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-7": {
+            "path": "look-down-7",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "feeding-real-0": {
+            "path": "feeding-real-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "feeding-real-1": {
+            "path": "feeding-real-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "feeding-real-2": {
+            "path": "feeding-real-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "feeding-real-3": {
+            "path": "feeding-real-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "feeding-real-4": {
+            "path": "feeding-real-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "feeding-real-5": {
+            "path": "feeding-real-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "drinking-real-0": {
+            "path": "drinking-real-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "drinking-real-1": {
+            "path": "drinking-real-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "drinking-real-2": {
+            "path": "drinking-real-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "drinking-real-3": {
+            "path": "drinking-real-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "drinking-real-4": {
+            "path": "drinking-real-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "drinking-real-5": {
+            "path": "drinking-real-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          }
+        },
+        "real-action-next": {
+          "idle-0": {
+            "path": "idle-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "idle-1": {
+            "path": "idle-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "idle-2": {
+            "path": "idle-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "idle-3": {
+            "path": "idle-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "idle-4": {
+            "path": "idle-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "idle-5": {
+            "path": "idle-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-0": {
+            "path": "running-right-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-1": {
+            "path": "running-right-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-2": {
+            "path": "running-right-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-3": {
+            "path": "running-right-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-4": {
+            "path": "running-right-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-5": {
+            "path": "running-right-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-6": {
+            "path": "running-right-6",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-right-7": {
+            "path": "running-right-7",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-0": {
+            "path": "running-left-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-1": {
+            "path": "running-left-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-2": {
+            "path": "running-left-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-3": {
+            "path": "running-left-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-4": {
+            "path": "running-left-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-5": {
+            "path": "running-left-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-6": {
+            "path": "running-left-6",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "running-left-7": {
+            "path": "running-left-7",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "handshake-0": {
+            "path": "handshake-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "handshake-1": {
+            "path": "handshake-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "handshake-2": {
+            "path": "handshake-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "handshake-3": {
+            "path": "handshake-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "jumping-0": {
+            "path": "jumping-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "jumping-1": {
+            "path": "jumping-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "jumping-2": {
+            "path": "jumping-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "jumping-3": {
+            "path": "jumping-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "jumping-4": {
+            "path": "jumping-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-0": {
+            "path": "sleeping-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-1": {
+            "path": "sleeping-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-2": {
+            "path": "sleeping-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-3": {
+            "path": "sleeping-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-4": {
+            "path": "sleeping-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-5": {
+            "path": "sleeping-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-6": {
+            "path": "sleeping-6",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "sleeping-7": {
+            "path": "sleeping-7",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "waiting-0": {
+            "path": "waiting-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "waiting-1": {
+            "path": "waiting-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "waiting-2": {
+            "path": "waiting-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "waiting-3": {
+            "path": "waiting-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "waiting-4": {
+            "path": "waiting-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "waiting-5": {
+            "path": "waiting-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "playing-0": {
+            "path": "playing-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "playing-1": {
+            "path": "playing-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "playing-2": {
+            "path": "playing-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "playing-3": {
+            "path": "playing-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "playing-4": {
+            "path": "playing-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "playing-5": {
+            "path": "playing-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "cleaning-0": {
+            "path": "cleaning-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "cleaning-1": {
+            "path": "cleaning-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "cleaning-2": {
+            "path": "cleaning-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "cleaning-3": {
+            "path": "cleaning-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "cleaning-4": {
+            "path": "cleaning-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "cleaning-5": {
+            "path": "cleaning-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-0": {
+            "path": "look-up-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-1": {
+            "path": "look-up-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-2": {
+            "path": "look-up-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-3": {
+            "path": "look-up-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-4": {
+            "path": "look-up-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-5": {
+            "path": "look-up-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-6": {
+            "path": "look-up-6",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-up-7": {
+            "path": "look-up-7",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-0": {
+            "path": "look-down-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-1": {
+            "path": "look-down-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-2": {
+            "path": "look-down-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-3": {
+            "path": "look-down-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-4": {
+            "path": "look-down-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-5": {
+            "path": "look-down-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-6": {
+            "path": "look-down-6",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "look-down-7": {
+            "path": "look-down-7",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "feeding-real-0": {
+            "path": "feeding-real-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "feeding-real-1": {
+            "path": "feeding-real-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "feeding-real-2": {
+            "path": "feeding-real-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "feeding-real-3": {
+            "path": "feeding-real-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "feeding-real-4": {
+            "path": "feeding-real-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "feeding-real-5": {
+            "path": "feeding-real-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "drinking-real-0": {
+            "path": "drinking-real-0",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "drinking-real-1": {
+            "path": "drinking-real-1",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "drinking-real-2": {
+            "path": "drinking-real-2",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "drinking-real-3": {
+            "path": "drinking-real-3",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "drinking-real-4": {
+            "path": "drinking-real-4",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          },
+          "drinking-real-5": {
+            "path": "drinking-real-5",
+            "x": 0,
+            "y": 0,
+            "width": 192,
+            "height": 208
+          }
+        }
+      }
+    }
+  ],
+  "animations": {
+    "idle": {
+      "slots": {
+        "pet": {
+          "attachment": [
+            {
+              "name": "idle-0"
+            },
+            {
+              "time": 0.42,
+              "name": "idle-1"
+            },
+            {
+              "time": 0.68,
+              "name": "idle-2"
+            },
+            {
+              "time": 0.94,
+              "name": "idle-3"
+            },
+            {
+              "time": 1.28,
+              "name": "idle-4"
+            },
+            {
+              "time": 1.62,
+              "name": "idle-5"
+            },
+            {
+              "time": 2.24,
+              "name": "idle-0"
+            }
+          ]
+        }
+      }
+    },
+    "waiting": {
+      "slots": {
+        "pet": {
+          "attachment": [
+            {
+              "name": "waiting-0"
+            },
+            {
+              "time": 0.8,
+              "name": "waiting-1"
+            },
+            {
+              "time": 1.6,
+              "name": "waiting-2"
+            },
+            {
+              "time": 2.4,
+              "name": "waiting-3"
+            },
+            {
+              "time": 3.2,
+              "name": "waiting-4"
+            },
+            {
+              "time": 4,
+              "name": "waiting-5"
+            },
+            {
+              "time": 5.4,
+              "name": "waiting-0"
+            }
+          ]
+        }
+      }
+    },
+    "petting": {
+      "slots": {
+        "pet": {
+          "attachment": [
+            {
+              "name": "cleaning-0"
+            },
+            {
+              "time": 0.48,
+              "name": "cleaning-1"
+            },
+            {
+              "time": 1.03,
+              "name": "cleaning-2"
+            },
+            {
+              "time": 1.68,
+              "name": "cleaning-3"
+            },
+            {
+              "time": 2.23,
+              "name": "cleaning-4"
+            },
+            {
+              "time": 2.71,
+              "name": "cleaning-5"
+            },
+            {
+              "time": 3.36,
+              "name": null
+            }
+          ]
+        }
+      }
+    },
+    "handshake": {
+      "slots": {
+        "pet": {
+          "attachment": [
+            {
+              "name": "handshake-0"
+            },
+            {
+              "time": 0.65,
+              "name": "handshake-1"
+            },
+            {
+              "time": 1.4,
+              "name": "handshake-2"
+            },
+            {
+              "time": 2.3,
+              "name": "handshake-2"
+            },
+            {
+              "time": 3.2,
+              "name": "handshake-2"
+            },
+            {
+              "time": 3.95,
+              "name": "handshake-1"
+            },
+            {
+              "time": 4.6,
+              "name": "handshake-0"
+            },
+            {
+              "time": 5.5,
+              "name": null
+            }
+          ]
+        }
+      }
+    },
+    "playing": {
+      "slots": {
+        "pet": {
+          "attachment": [
+            {
+              "name": "playing-0"
+            },
+            {
+              "time": 0.42,
+              "name": "playing-1"
+            },
+            {
+              "time": 0.84,
+              "name": "playing-2"
+            },
+            {
+              "time": 1.32,
+              "name": "playing-3"
+            },
+            {
+              "time": 1.8,
+              "name": "playing-4"
+            },
+            {
+              "time": 2.32,
+              "name": "playing-5"
+            },
+            {
+              "time": 3,
+              "name": null
+            }
+          ]
+        }
+      }
+    },
+    "sleeping": {
+      "slots": {
+        "pet": {
+          "attachment": [
+            {
+              "name": "sleeping-0"
+            },
+            {
+              "time": 0.45,
+              "name": "sleeping-1"
+            },
+            {
+              "time": 1,
+              "name": "sleeping-2"
+            },
+            {
+              "time": 1.6,
+              "name": "sleeping-3"
+            },
+            {
+              "time": 2.25,
+              "name": "sleeping-4"
+            },
+            {
+              "time": 2.95,
+              "name": "sleeping-5"
+            },
+            {
+              "time": 3.7,
+              "name": "sleeping-6"
+            },
+            {
+              "time": 4.55,
+              "name": "sleeping-7"
+            },
+            {
+              "time": 5.45,
+              "name": "sleeping-6"
+            },
+            {
+              "time": 6.3,
+              "name": "sleeping-5"
+            },
+            {
+              "time": 7.05,
+              "name": "sleeping-4"
+            },
+            {
+              "time": 7.75,
+              "name": "sleeping-3"
+            },
+            {
+              "time": 8.4,
+              "name": "sleeping-2"
+            },
+            {
+              "time": 9,
+              "name": "sleeping-1"
+            },
+            {
+              "time": 9.55,
+              "name": "sleeping-0"
+            }
+          ]
+        }
+      }
+    },
+    "cleaning": {
+      "slots": {
+        "pet": {
+          "attachment": [
+            {
+              "name": "handshake-0"
+            },
+            {
+              "time": 0.5,
+              "name": "handshake-1"
+            },
+            {
+              "time": 1.15,
+              "name": "handshake-2"
+            },
+            {
+              "time": 2,
+              "name": "handshake-3"
+            },
+            {
+              "time": 2.65,
+              "name": null
+            }
+          ]
+        }
+      }
+    },
+    "running": {
+      "slots": {
+        "pet": {
+          "attachment": [
+            {
+              "name": "running-right-0"
+            },
+            {
+              "time": 0.28,
+              "name": "running-right-1"
+            },
+            {
+              "time": 0.56,
+              "name": "running-right-2"
+            },
+            {
+              "time": 0.84,
+              "name": "running-right-3"
+            },
+            {
+              "time": 1.12,
+              "name": "running-right-4"
+            },
+            {
+              "time": 1.4,
+              "name": "running-right-5"
+            },
+            {
+              "time": 1.68,
+              "name": "running-right-6"
+            },
+            {
+              "time": 1.96,
+              "name": "running-right-7"
+            },
+            {
+              "time": 2.38,
+              "name": "running-right-0"
+            }
+          ]
+        }
+      }
+    },
+    "review": {
+      "slots": {
+        "pet": {
+          "attachment": [
+            {
+              "name": "cleaning-0"
+            },
+            {
+              "time": 0.7,
+              "name": "cleaning-1"
+            },
+            {
+              "time": 1.4,
+              "name": "cleaning-2"
+            },
+            {
+              "time": 2.1,
+              "name": "cleaning-3"
+            },
+            {
+              "time": 2.8,
+              "name": "cleaning-4"
+            },
+            {
+              "time": 3.5,
+              "name": "cleaning-5"
+            },
+            {
+              "time": 4.9,
+              "name": "cleaning-0"
+            }
+          ]
+        }
+      }
+    },
+    "failed": {
+      "slots": {
+        "pet": {
+          "attachment": [
+            {
+              "name": "sleeping-0"
+            },
+            {
+              "time": 0.55,
+              "name": "sleeping-1"
+            },
+            {
+              "time": 1.1,
+              "name": "sleeping-2"
+            },
+            {
+              "time": 1.75,
+              "name": "sleeping-3"
+            },
+            {
+              "time": 2.45,
+              "name": "sleeping-4"
+            },
+            {
+              "time": 3.2,
+              "name": "sleeping-5"
+            },
+            {
+              "time": 4,
+              "name": "sleeping-6"
+            },
+            {
+              "time": 4.85,
+              "name": "sleeping-7"
+            },
+            {
+              "time": 5.85,
+              "name": "sleeping-0"
+            }
+          ]
+        }
+      }
+    },
+    "feeding": {
+      "slots": {
+        "pet": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "real-action": {
+          "attachment": [
+            {
+              "name": null
+            },
+            {
+              "time": 0.12,
+              "name": "feeding-real-0"
+            },
+            {
+              "time": 0.85,
+              "name": "feeding-real-1"
+            },
+            {
+              "time": 1.58,
+              "name": "feeding-real-2"
+            },
+            {
+              "time": 2.31,
+              "name": "feeding-real-3"
+            },
+            {
+              "time": 3.04,
+              "name": "feeding-real-4"
+            },
+            {
+              "time": 3.77,
+              "name": "feeding-real-5"
+            },
+            {
+              "time": 4.85,
+              "name": null
+            }
+          ]
+        }
+      }
+    },
+    "drinking": {
+      "slots": {
+        "pet": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "real-action": {
+          "attachment": [
+            {
+              "name": null
+            },
+            {
+              "time": 0.12,
+              "name": "drinking-real-0"
+            },
+            {
+              "time": 0.85,
+              "name": "drinking-real-1"
+            },
+            {
+              "time": 1.58,
+              "name": "drinking-real-2"
+            },
+            {
+              "time": 2.31,
+              "name": "drinking-real-3"
+            },
+            {
+              "time": 3.04,
+              "name": "drinking-real-4"
+            },
+            {
+              "time": 3.77,
+              "name": "drinking-real-5"
+            },
+            {
+              "time": 4.85,
+              "name": null
+            }
+          ]
+        }
+      }
+    }
+  }
+}

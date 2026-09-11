@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>啾啾 · Spine 2D 桌宠</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <main class="shell" id="app-shell">
+    <header class="topbar">
+      <div class="brand-block" data-host-action="drag" title="按住拖动啾啾">
+        <div class="brand-mark">啾</div>
+        <div>
+          <p class="eyebrow">JIUJIU · SPINE GPU PET</p>
+          <h1>啾啾</h1>
+          <p class="subtitle" id="mood-status">今天也要和你一起玩</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="telemetry" aria-live="polite">
+          <span id="spine-status" class="pill pending">Spine 加载中</span>
+          <span id="gpu-status" class="pill pending">GPU 检测中</span>
+          <span id="rig-status" class="pill pending">分层骨骼检测中</span>
+          <span id="interpolation-status" class="pill ok">Spine 补帧开启</span>
+          <span id="fps-status" class="metric">-- FPS</span>
+        </div>
+        <div class="window-actions" aria-label="窗口控制">
+          <button class="window-button panel-toggle" id="panel-toggle" title="打开照顾面板" aria-expanded="false">☰</button>
+          <button class="window-button" data-host-action="minimize" title="最小化">−</button>
+          <button class="window-button close" data-host-action="close" title="退出桌宠">×</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="workspace">
+      <div class="stage-card">
+        <div class="stage-wrap" id="stage-wrap">
+          <canvas id="stage" width="512" height="512" aria-label="啾啾 Spine GPU 动画画布"></canvas>
+          <div id="pet-bubble" class="pet-bubble" aria-live="polite"></div>
+          <div class="quick-actions" aria-label="快捷照顾">
+            <button class="quick-action" data-action="petting" title="摸摸头"><span>♡</span><b>摸摸头</b></button>
+            <button class="quick-action" data-action="feeding" title="喂饭饭"><span>🥣</span><b>饭饭</b></button>
+            <button class="quick-action" data-action="drinking" title="喝水水"><span>💧</span><b>喝水水</b></button>
+            <button class="quick-action" data-action="playing" title="玩球球"><span>⚽</span><b>玩球球</b></button>
+            <button class="quick-action" data-action="rest" title="睡一会儿"><span>☁</span><b>休息</b></button>
+          </div>
+          <div id="loading" class="loading">正在加载啾啾…</div>
+          <div id="error" class="error" hidden></div>
+          <div id="toast" class="toast" aria-live="polite"></div>
+          <div class="stage-hint">按住啾啾即可拖动 · 松开有惯性</div>
+        </div>
+        <div class="stage-caption">
+          <span id="motion-status">idle · 呼吸中</span>
+          <span id="drag-status">啾啾在等你</span>
+        </div>
+      </div>
+
+      <aside class="control-card">
+        <div class="control-head">
+          <div>
+            <p class="eyebrow">CARE PANEL</p>
+            <h2>照顾啾啾</h2>
+          </div>
+          <span class="live-dot">LIVE</span>
+        </div>
+
+        <section class="status-panel" aria-label="啾啾状态">
+          <div class="status-heading">
+            <span>今天的状态</span>
+            <span id="status-summary">状态不错</span>
+          </div>
+          <div class="status-grid">
+            <div class="status-item" data-stat="hunger">
+              <div class="status-label"><span>饱腹</span><strong id="hunger-value">82%</strong></div>
+              <div class="progress"><i id="hunger-bar"></i></div>
+            </div>
+            <div class="status-item" data-stat="thirst">
+              <div class="status-label"><span>水分</span><strong id="thirst-value">76%</strong></div>
+              <div class="progress blue"><i id="thirst-bar"></i></div>
+            </div>
+              <div class="status-item" data-stat="happiness">
+                <div class="status-label"><span>心情</span><strong id="happiness-value">74%</strong></div>
+                <div class="progress pink"><i id="happiness-bar"></i></div>
+              </div>
+            </div>
+            <div class="status-mini-line" aria-label="次要状态">
+              <span>活力 <strong id="energy-value">68%</strong><i class="mini-progress"><b id="energy-bar"></b></i></span>
+              <span>干净 <strong id="cleanliness-value">88%</strong><i class="mini-progress pink"><b id="cleanliness-bar"></b></i></span>
+            </div>
+        </section>
+
+        <div class="section action-section">
+          <div class="section-title-row">
+            <p class="section-label">陪它做点什么</p>
+            <span class="section-help">移入查看动作</span>
+          </div>
+          <div class="actions" role="group" aria-label="啾啾动作">
+            <button class="action active" data-action="idle" data-animation="idle" data-loop="true"><span class="action-icon">☀</span><span>待机</span></button>
+            <button class="action" data-action="waiting" data-animation="waiting" data-loop="true"><span class="action-icon">♡</span><span>等你</span></button>
+            <button class="action" data-action="handshake" data-animation="handshake"><span class="action-icon">✋</span><span>握手</span></button>
+            <button class="action" data-action="playing" data-animation="playing"><span class="action-icon">⚽</span><span>玩球</span></button>
+            <button class="action" data-action="sleeping" data-animation="sleeping" data-loop="true"><span class="action-icon">☾</span><span>睡觉</span></button>
+          </div>
+        </div>
+
+        <div class="care-tray" aria-label="照顾用品">
+          <div class="section-title-row"><p class="section-label">房间里的小物件</p><span class="section-help">完成后才会消耗</span></div>
+          <div class="care-items">
+            <button class="care-item" data-action="feeding"><span class="care-item-icon">🥣</span><div><strong>饭饭</strong><small>还剩 <b id="food-count">6</b> 份</small></div><span class="care-item-arrow">›</span></button>
+            <button class="care-item" data-action="drinking"><span class="care-item-icon">💧</span><div><strong>喝水水</strong><small>还剩 <b id="water-count">8</b> 杯</small></div><span class="care-item-arrow">›</span></button>
+            <button class="care-item" data-action="cleaning"><span class="care-item-icon">🫧</span><div><strong>梳毛毛</strong><small>恢复干净和心情</small></div><span class="care-item-arrow">›</span></button>
+            <button class="care-item" data-action="rest"><span class="care-item-icon">☁</span><div><strong>小窝休息</strong><small>慢慢恢复活力</small></div><span class="care-item-arrow">›</span></button>
+          </div>
+        </div>
+
+        <div class="record-row">
+          <div>
+            <p class="section-label">今日陪伴</p>
+            <strong id="today-record">还没有记录</strong>
+          </div>
+          <button class="text-button" id="reset-state">重置状态</button>
+        </div>
+
+        <div class="section settings">
+          <div class="section-title-row"><p class="section-label">偏好设置</p><span class="section-help">自动保存</span></div>
+          <label class="switch-row"><span>自动行为</span><input id="auto-toggle" type="checkbox" checked></label>
+          <label class="switch-row"><span>自动行为间隔</span><select id="auto-interval"><option value="15">15 分钟</option><option value="30" selected>30 分钟</option><option value="60">60 分钟</option></select></label>
+          <label class="switch-row"><span>渲染档位</span><select id="quality-select"><option value="60">节能 · 60Hz</option><option value="180" selected>中等 · 180Hz</option><option value="300">流畅 · 300Hz</option></select></label>
+          <label class="scale-row" for="scale-range"><span>桌宠大小 <output id="scale-value" for="scale-range">100%</output></span><input id="scale-range" type="range" min="70" max="130" step="5" value="100"></label>
+          <label class="switch-row"><span>显示骨架</span><input id="debug-toggle" type="checkbox"></label>
+        </div>
+
+        <div class="tech-note">
+          <div class="note-icon">✦</div>
+          <div><strong>Spine 2D + GPU · 60 FPS 补帧已启用</strong><p>骨骼动作按真实时间步进并在关键姿势之间连续插值；喂食/喝水的照片帧使用短时双槽过渡，减少跳帧感。拖动时直接跟手，松开后再交给惯性。</p></div>
+        </div>
+      </aside>
+    </section>
+
+    <footer>
+      <span>Spine runtime 4.2.120 · WebGL GPU</span>
+      <span id="quality-note">目标 180Hz · Spine 连续补帧 · 实际刷新受显示器与系统合成器限制</span>
+    </footer>
+  </main>
+
+  <script src="vendor/spine-webgl-4.2.120.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

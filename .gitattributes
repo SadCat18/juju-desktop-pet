@@ -1,0 +1,22 @@
+# 行尾红线：启动脚本曾被 LF 行尾截断导致路径拼接错误，cmd/bat 必须锁定 CRLF
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+* text=auto
+
+# 二进制资产
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.zip binary
+*.nupkg binary
+*.dll binary
+*.exe binary
+*.jar binary
+*.apk binary
+*.lib binary
+*.bin binary

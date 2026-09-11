@@ -1,0 +1,33 @@
+# ===== 构建产物（可由脚本重新生成）=====
+android-pet/.gradle/
+android-pet/build/
+android-pet/app/build/
+android-pet/local.properties/
+
+# 桌面宿主编译产物（build-desktop-host.cmd 重新生成）
+spine-poc/desktop-host/*.exe
+spine-poc/desktop-host/*.dll
+
+# WebView2 NuGet 解包目录中仅 lib/net462 与 runtimes/ 为构建所需；静态库等中间产物不入库
+spine-poc/vendor/webview2-package/build/
+spine-poc/vendor/webview2-package/obj/
+
+# QA 截图证据（可由 qa/*.mjs 重新生成；脚本与校验 JSON 保留）
+spine-poc/qa/*.png
+
+# ===== 历史隔离区（有意保留在本地，不入库）=====
+spine-poc/desktop-host/legacy/
+outputs/xiaobai-desktop-pet/legacy/
+outputs/xiaobai-web/legacy/
+
+# ===== 历史工作区与 agent 中间产物（保留在本地，不入库）=====
+work/
+spine-poc/real-pet-run-20260910/
+outputs/look-row-*.png
+.codex/*
+!.codex/progress/
+
+# ===== 系统杂项 =====
+Thumbs.db
+Desktop.ini
+~$*

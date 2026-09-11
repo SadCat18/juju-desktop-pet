@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>啾啾 · 独立互动宠物</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, -apple-system, "Microsoft YaHei", sans-serif; }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh; margin: 0; display: grid; place-items: center;
+      color: #26414a; background: radial-gradient(circle at 50% 20%, #fff 0 18%, transparent 46%), #dff3ef;
+    }
+    main { width: min(92vw, 520px); padding: 28px 24px 22px; text-align: center; }
+    h1 { margin: 0 0 4px; font-size: 28px; }
+    p { margin: 0; color: #648087; }
+    .stage {
+      min-height: 330px; margin: 22px 0 16px; display: grid; place-items: end center;
+      border-radius: 28px; background: linear-gradient(#effcf9, #d2eee8);
+      box-shadow: inset 0 -12px 0 #b9ded7, 0 18px 45px #77aaa244;
+    }
+    #pet {
+      width: 240px; height: 260px; padding: 0; border: 0; cursor: pointer;
+      background: transparent url("spritesheet.webp") no-repeat;
+      background-size: 1920px 2860px;
+      filter: drop-shadow(0 10px 7px #5b8e8730);
+      transition: transform .15s ease, filter .15s ease;
+    }
+    #pet:hover { transform: translateY(-4px) scale(1.02); filter: drop-shadow(0 14px 9px #5b8e8740); }
+    #pet:focus-visible { outline: 4px solid #78bdb1; outline-offset: 4px; border-radius: 18px; }
+    .status { min-height: 24px; font-weight: 600; }
+    .hint { margin-top: 8px; font-size: 14px; }
+    .actions { display: flex; justify-content: center; gap: 8px; margin-top: 16px; }
+    .actions button {
+      border: 1px solid #acd9d2; border-radius: 999px; padding: 8px 14px; cursor: pointer;
+      color: #35615f; background: #fff; font: inherit;
+    }
+    .actions button:hover { background: #f5fffd; }
+    @media (prefers-reduced-motion: reduce) { #pet { transition: none; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>啾啾</h1>
+    <p>你的独立互动小狗</p>
+    <section class="stage" aria-label="啾啾互动区域">
+      <button id="pet" type="button" aria-label="点击啾啾互动"></button>
+    </section>
+    <div id="status" class="status" aria-live="polite">啾啾正在待机</div>
+    <p class="hint">点击握手 · 双击跳跳 · 按 Enter 或空格也可以互动</p>
+    <div class="actions" aria-label="动画操作">
+      <button type="button" data-action="handshake">握手</button>
+      <button type="button" data-action="jumping">跳跳</button>
+      <button type="button" data-action="running">跑跑</button>
+      <button type="button" data-action="waiting">等你</button>
+      <button type="button" data-action="review">观察</button>
+    </div>
+  </main>
+  <script>
+    const pet = document.querySelector("#pet");
+    const status = document.querySelector("#status");
+    const scale = 1.25; // Exact integer-sized cell scale: 192x208 -> 240x260.
+    const states = {
+      idle:      { row: 0, frames: 6, durations: [420, 260, 260, 340, 340, 620], label: "待机" },
+      handshake: { row: 3, sequence: [0, 1, 2, 2, 2, 1, 0], durations: [700, 900, 1100, 1100, 1100, 900, 1200], label: "握手" },
+      jumping:   { row: 4, frames: 5, durations: [650, 750, 750, 750, 1300], label: "跳跳" },
+      running:   { row: 1, frames: 8, durations: [500, 500, 500, 500, 500, 500, 500, 900], label: "跑跑" },
+      waiting:   { row: 6, frames: 6, durations: [800, 800, 800, 800, 800, 1400], label: "等你" },
+      review:    { row: 8, frames: 6, durations: [700, 700, 700, 700, 700, 1400], label: "观察" }
+    };
+    const MOTION_SLOWDOWN = 1.5;
+    let current = "idle", frame = 0, timer;
+
+    const frameDelay = (state, index) => Math.round(state.durations[index] * MOTION_SLOWDOWN);
+
+    function render() {
+      const state = states[current];
+      const sourceFrame = state.sequence ? state.sequence[frame] : frame;
+      pet.style.backgroundPosition = `${-sourceFrame * 192 * scale}px ${-state.row * 208 * scale}px`;
+      status.textContent = `啾啾正在${state.label}`;
+    }
+
+    function play(name, once = false) {
+      clearTimeout(timer);
+      current = name in states ? name : "idle";
+      frame = 0;
+      render();
+      const state = states[current];
+      const frameCount = state.sequence ? state.sequence.length : state.frames;
+      const advance = () => {
+        if (once && frame === frameCount - 1) return play("idle");
+        frame = (frame + 1) % frameCount;
+        render();
+      timer = setTimeout(advance, frameDelay(state, frame));
+      };
+      timer = setTimeout(advance, state.durations[0]);
+    }
+
+    pet.addEventListener("click", () => play("handshake", true));
+    pet.addEventListener("dblclick", () => play("jumping", true));
+    pet.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        play("handshake", true);
+      }
+    });
+    document.querySelectorAll("[data-action]").forEach(button => {
+      button.addEventListener("click", () => play(button.dataset.action, true));
+    });
+    play("idle");
+  </script>
+</body>
+</html>

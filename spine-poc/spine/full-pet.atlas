@@ -1,0 +1,429 @@
+spritesheet-clean.png
+size: 1536, 2288
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+idle-0
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+idle-1
+bounds: 192, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+idle-2
+bounds: 384, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+idle-3
+bounds: 576, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+idle-4
+bounds: 768, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+idle-5
+bounds: 960, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+running-right-0
+bounds: 0, 208, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+running-right-1
+bounds: 192, 208, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+running-right-2
+bounds: 384, 208, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+running-right-3
+bounds: 576, 208, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+running-right-4
+bounds: 768, 208, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+running-right-5
+bounds: 960, 208, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+running-right-6
+bounds: 1152, 208, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+running-right-7
+bounds: 1344, 208, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+running-left-0
+bounds: 0, 416, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+running-left-1
+bounds: 192, 416, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+running-left-2
+bounds: 384, 416, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+running-left-3
+bounds: 576, 416, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+running-left-4
+bounds: 768, 416, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+running-left-5
+bounds: 960, 416, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+running-left-6
+bounds: 1152, 416, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+running-left-7
+bounds: 1344, 416, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+handshake-0
+bounds: 0, 624, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+handshake-1
+bounds: 192, 624, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+handshake-2
+bounds: 384, 624, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+handshake-3
+bounds: 576, 624, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+jumping-0
+bounds: 0, 832, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+jumping-1
+bounds: 192, 832, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+jumping-2
+bounds: 384, 832, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+jumping-3
+bounds: 576, 832, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+jumping-4
+bounds: 768, 832, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+sleeping-0
+bounds: 0, 1040, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+sleeping-1
+bounds: 192, 1040, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+sleeping-2
+bounds: 384, 1040, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+sleeping-3
+bounds: 576, 1040, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+sleeping-4
+bounds: 768, 1040, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+sleeping-5
+bounds: 960, 1040, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+sleeping-6
+bounds: 1152, 1040, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+sleeping-7
+bounds: 1344, 1040, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+waiting-0
+bounds: 0, 1248, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+waiting-1
+bounds: 192, 1248, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+waiting-2
+bounds: 384, 1248, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+waiting-3
+bounds: 576, 1248, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+waiting-4
+bounds: 768, 1248, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+waiting-5
+bounds: 960, 1248, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+playing-0
+bounds: 0, 1456, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+playing-1
+bounds: 192, 1456, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+playing-2
+bounds: 384, 1456, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+playing-3
+bounds: 576, 1456, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+playing-4
+bounds: 768, 1456, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+playing-5
+bounds: 960, 1456, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+cleaning-0
+bounds: 0, 1664, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+cleaning-1
+bounds: 192, 1664, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+cleaning-2
+bounds: 384, 1664, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+cleaning-3
+bounds: 576, 1664, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+cleaning-4
+bounds: 768, 1664, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+cleaning-5
+bounds: 960, 1664, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+look-up-0
+bounds: 0, 1872, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+look-up-1
+bounds: 192, 1872, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+look-up-2
+bounds: 384, 1872, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+look-up-3
+bounds: 576, 1872, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+look-up-4
+bounds: 768, 1872, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+look-up-5
+bounds: 960, 1872, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+look-up-6
+bounds: 1152, 1872, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+look-up-7
+bounds: 1344, 1872, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+look-down-0
+bounds: 0, 2080, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+look-down-1
+bounds: 192, 2080, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+look-down-2
+bounds: 384, 2080, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+look-down-3
+bounds: 576, 2080, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+look-down-4
+bounds: 768, 2080, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+look-down-5
+bounds: 960, 2080, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+look-down-6
+bounds: 1152, 2080, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+look-down-7
+bounds: 1344, 2080, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+feeding-real-0.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+feeding-real-0
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+
+feeding-real-1.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+feeding-real-1
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+
+feeding-real-2.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+feeding-real-2
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+
+feeding-real-3.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+feeding-real-3
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+
+feeding-real-4.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+feeding-real-4
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+
+feeding-real-5.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+feeding-real-5
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+
+drinking-real-0.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+drinking-real-0
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+
+drinking-real-1.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+drinking-real-1
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+
+drinking-real-2.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+drinking-real-2
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+
+drinking-real-3.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+drinking-real-3
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+
+drinking-real-4.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+drinking-real-4
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
+
+drinking-real-5.png
+size: 192, 208
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+drinking-real-5
+bounds: 0, 0, 192, 208
+offsets: 0, 0, 192, 208
+index: -1
+
